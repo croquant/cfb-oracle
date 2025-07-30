@@ -14,7 +14,7 @@ class Venue(models.Model):
     timezone = models.CharField(max_length=50, null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
-    elevation = models.CharField(max_length=50, null=True, blank=True)
+    elevation = models.FloatField(null=True, blank=True)
     capacity = models.IntegerField(null=True, blank=True)
     construction_year = models.IntegerField(null=True, blank=True)
     grass = models.BooleanField(null=True, blank=True)

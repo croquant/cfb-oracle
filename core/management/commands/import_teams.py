@@ -45,7 +45,9 @@ class Command(BaseCommand):
                             "timezone": venue.timezone,
                             "latitude": venue.latitude,
                             "longitude": venue.longitude,
-                            "elevation": venue.elevation,
+                            "elevation": float(venue.elevation)
+                            if venue.elevation
+                            else None,
                             "capacity": venue.capacity,
                             "construction_year": venue.construction_year,
                             "grass": venue.grass,
