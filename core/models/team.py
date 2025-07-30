@@ -26,6 +26,8 @@ class Team(models.Model):
 
     class Meta:
         ordering = ["school"]
+        verbose_name = "team"
+        verbose_name_plural = "teams"
 
     def __str__(self):
         return f"{self.school} {self.mascot} ({self.abbreviation})"
@@ -48,6 +50,8 @@ class TeamAlternativeName(models.Model):
                 name="team_name_unique",
             )
         ]
+        verbose_name = "team alternative name"
+        verbose_name_plural = "team alternative names"
 
     def __str__(self):
         return f"{self.name} ({self.team.abbreviation})"
@@ -63,3 +67,7 @@ class TeamLogo(models.Model):
 
     def __str__(self):
         return f"Logo for {self.team.abbreviation}: {self.url}"
+
+    class Meta:
+        verbose_name = "team logo"
+        verbose_name_plural = "team logos"

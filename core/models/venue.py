@@ -25,3 +25,5 @@ class Venue(models.Model):
 
     class Meta:
         ordering = ["name"]
+        verbose_name = "venue"
+        verbose_name_plural = "venues"
