@@ -4,6 +4,12 @@ from core.models.venue import Venue
 
 
 class Team(models.Model):
+    class Classification(models.TextChoices):
+        FBS = "fbs", "FBS"
+        FCS = "fcs", "FCS"
+        II = "ii", "Division II"
+        III = "iii", "Division III"
+
     """
     Represents a sports team.
     """
@@ -12,7 +18,12 @@ class Team(models.Model):
     mascot = models.CharField(max_length=100, null=True, blank=True)
     abbreviation = models.CharField(max_length=20, null=True, blank=True)
     conference = models.CharField(max_length=100, null=True, blank=True)
-    classification = models.CharField(max_length=100, null=True, blank=True)
+    classification = models.CharField(
+        max_length=100,
+        choices=Classification.choices,
+        null=True,
+        blank=True,
+    )
     color = models.CharField(max_length=20)
     alternate_color = models.CharField(max_length=20)
     twitter = models.CharField(max_length=100, null=True, blank=True)
