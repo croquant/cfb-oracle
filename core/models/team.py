@@ -35,6 +35,14 @@ class TeamAlternativeName(models.Model):
     )
     name = models.CharField(max_length=200)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["team", "name"],
+                name="team_name_unique",
+            )
+        ]
+
     def __str__(self):
         return f"{self.name} ({self.team.abbreviation})"
 
