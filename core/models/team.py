@@ -46,9 +46,14 @@ class Team(models.Model):
         return f"{self.school} {self.mascot} ({self.abbreviation})"
 
     def save(self, *args, **kwargs):
-        if not self.slug:
-            base = self.abbreviation or self.school
-            self.slug = slugify(base)[:50]
+        if not self.slug or self.slug == "":
+            base_slug = slugify(self.school)
+            slug = base_slug
+            counter = 1
+            while Team.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
         super().save(*args, **kwargs)
 
 
