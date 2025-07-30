@@ -18,7 +18,11 @@ class Team(models.Model):
     alternate_color = models.CharField(max_length=20)
     twitter = models.CharField(max_length=100, null=True, blank=True)
     location = models.ForeignKey(
-        Venue, on_delete=models.CASCADE, related_name="teams", null=True, blank=True
+        Venue,
+        on_delete=models.SET_NULL,
+        related_name="teams",
+        null=True,
+        blank=True,
     )
 
     def __str__(self):
