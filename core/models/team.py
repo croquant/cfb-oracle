@@ -12,7 +12,6 @@ class Team(models.Model):
     mascot = models.CharField(max_length=100, null=True, blank=True)
     abbreviation = models.CharField(max_length=20, null=True, blank=True)
     conference = models.CharField(max_length=100, null=True, blank=True)
-    division = models.CharField(max_length=100)
     classification = models.CharField(max_length=100, null=True, blank=True)
     color = models.CharField(max_length=20)
     alternate_color = models.CharField(max_length=20)
