@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.text import slugify
 
 from core.models.venue import Venue
 
@@ -17,6 +18,7 @@ class Team(models.Model):
     school = models.CharField(max_length=200)
     mascot = models.CharField(max_length=100, null=True, blank=True)
     abbreviation = models.CharField(max_length=20, null=True, blank=True)
+    slug = models.SlugField(max_length=50, unique=True)
     conference = models.CharField(max_length=100, null=True, blank=True)
     classification = models.CharField(
         max_length=100,
@@ -42,6 +44,12 @@ class Team(models.Model):
 
     def __str__(self):
         return f"{self.school} {self.mascot} ({self.abbreviation})"
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base = self.abbreviation or self.school
+            self.slug = slugify(base)[:50]
+        super().save(*args, **kwargs)
 
 
 class TeamAlternativeName(models.Model):
