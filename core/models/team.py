@@ -25,6 +25,9 @@ class Team(models.Model):
         blank=True,
     )
 
+    class Meta:
+        ordering = ["school"]
+
     def __str__(self):
         return f"{self.school} {self.mascot} ({self.abbreviation})"
 
