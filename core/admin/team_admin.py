@@ -11,6 +11,7 @@ class TeamAlternativeNameTabularInline(TabularInline):
     fields = ("name",)
     extra = 0
     hide_title = True
+    tab = True
 
 
 class TeamLogoInline(TabularInline):
@@ -19,6 +20,7 @@ class TeamLogoInline(TabularInline):
     readonly_fields = ("preview",)
     extra = 0
     hide_title = True
+    tab = True
 
     def preview(self, obj):
         if obj.url:
@@ -45,19 +47,23 @@ class TeamAdmin(ModelAdmin):
         "conference",
     )
     list_filter_sheet = False
-    # readonly_fields = ("logo_display", "slug")
     prepopulated_fields = {"slug": ("school",)}
     inlines = [TeamAlternativeNameTabularInline, TeamLogoInline]
-
-    def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        if (
-            request.resolver_match
-            and request.resolver_match.url_name
-            and request.resolver_match.url_name.endswith("_changelist")
-        ):
-            queryset = queryset.prefetch_related("alternative_names", "logos")
-        return queryset
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    ("school", "mascot"),
+                    ("slug", "abbreviation"),
+                    ("classification", "conference"),
+                    ("color", "alternate_color"),
+                    "twitter",
+                    "location",
+                ),
+            },
+        ),
+    )
 
     def logo_display(self, obj):
         logo = obj.logos.first()

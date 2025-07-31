@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+from django.urls import reverse
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -133,6 +134,50 @@ UNFOLD = {
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": False,
     "SHOW_BACK_BUTTON": True,
+    "BORDER_RADIUS": "0px",
+    "SIDEBAR": {
+        "navigation": [
+            {
+                "title": "Edit",
+                "items": [
+                    {
+                        "title": "Conferences",
+                        "icon": "flag",
+                        "link": lambda request: reverse(
+                            "admin:core_conference_changelist"
+                        ),
+                    },
+                    {
+                        "title": "Teams",
+                        "icon": "groups",
+                        "link": lambda request: reverse("admin:core_team_changelist"),
+                    },
+                    {
+                        "title": "Venues",
+                        "icon": "stadium",
+                        "link": lambda request: reverse("admin:core_venue_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "User Management",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Users",
+                        "icon": "person",
+                        "link": lambda request: reverse("admin:auth_user_changelist"),
+                    },
+                    {
+                        "title": "Groups",
+                        "icon": "group_work",
+                        "link": lambda request: reverse("admin:auth_group_changelist"),
+                    },
+                ],
+            },
+        ],
+    },
 }
 
 CRISPY_TEMPLATE_PACK = "unfold_crispy"
