@@ -6,4 +6,8 @@ from core.models.venue import Venue
 
 @admin.register(Venue)
 class VenueAdmin(ModelAdmin):
-    pass
+    list_display = (
+        "name",
+        "city",
+        "state",
+    )
