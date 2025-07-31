@@ -44,7 +44,7 @@ class TeamAdmin(ModelAdmin):
         "conference",
     )
     list_filter_sheet = False
-    readonly_fields = ("logo_display", "slug")
+    # readonly_fields = ("logo_display", "slug")
     prepopulated_fields = {"slug": ("school",)}
     inlines = [TeamAlternativeNameTabularInline, TeamLogoInline]
 
