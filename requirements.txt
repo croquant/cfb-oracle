@@ -2,6 +2,8 @@ aenum==3.1.16
 asgiref==3.9.1
 cfbd==5.8.2
 Django==5.2.4
+django-crispy-forms==2.4
+django-unfold==0.63.0
 pydantic==1.10.22
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.1

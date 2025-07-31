@@ -46,7 +46,7 @@ class Team(models.Model):
         return f"{self.school} {self.mascot} ({self.abbreviation})"
 
     def save(self, *args, **kwargs):
-        if not self.slug or self.slug == "":
+        if not self.slug or self.slug == "" or slugify(self.school) not in self.slug:
             base_slug = slugify(self.school)
             slug = base_slug
             counter = 1

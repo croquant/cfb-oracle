@@ -1,0 +1,34 @@
+from django.contrib import admin
+from unfold.admin import ModelAdmin, TabularInline
+
+from core.models.team import Team, TeamAlternativeName, TeamLogo
+
+
+class MyStackedInline(TabularInline):
+    model = TeamAlternativeName
+    hide_title = True
+
+
+class MyTabularInline(TabularInline):
+    model = TeamLogo
+
+
+@admin.register(Team)
+class TeamAdmin(ModelAdmin):
+    search_fields = ("school", "mascot")
+    list_filter = (
+        "classification",
+        "conference",
+    )
+    list_filter_sheet = False
+    inlines = [MyStackedInline, MyTabularInline]
+
+
+@admin.register(TeamAlternativeName)
+class TeamAlternativeNameAdmin(ModelAdmin):
+    pass
+
+
+@admin.register(TeamLogo)
+class TeamLogoAdmin(ModelAdmin):
+    pass
