@@ -16,6 +16,12 @@ class TeamLogoInline(TabularInline):
 @admin.register(Team)
 class TeamAdmin(ModelAdmin):
     search_fields = ("school", "mascot")
+    list_display = (
+        "school",
+        "mascot",
+        "abbreviation",
+        "conference",
+    )
     list_filter = (
         "classification",
         "conference",
@@ -26,9 +32,15 @@ class TeamAdmin(ModelAdmin):
 
 @admin.register(TeamAlternativeName)
 class TeamAlternativeNameAdmin(ModelAdmin):
-    pass
+    list_display = (
+        "team",
+        "name",
+    )
 
 
 @admin.register(TeamLogo)
 class TeamLogoAdmin(ModelAdmin):
-    pass
+    list_display = (
+        "team",
+        "url",
+    )
