@@ -2,16 +2,12 @@ import os
 
 import cfbd
 from cfbd.rest import ApiException
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from dotenv import load_dotenv
 
 from core.models.conference import Conference
 from core.models.team import Team, TeamAlternativeName, TeamLogo
 from core.models.venue import Venue
-
-load_dotenv()
-
-configuration = cfbd.Configuration(access_token=os.environ["CFBD_API_KEY"])
 
 
 class Command(BaseCommand):
@@ -28,6 +24,13 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        load_dotenv()
+        api_key = os.environ.get("CFBD_API_KEY")
+        if not api_key:
+            raise CommandError("CFBD_API_KEY environment variable not set")
+
+        configuration = cfbd.Configuration(access_token=api_key)
+
         with cfbd.ApiClient(configuration) as api_client:
             venues_api_instance = cfbd.VenuesApi(api_client)
             teams_api_instance = cfbd.TeamsApi(api_client)
@@ -47,9 +50,9 @@ class Command(BaseCommand):
                             "timezone": venue.timezone,
                             "latitude": venue.latitude,
                             "longitude": venue.longitude,
-                            "elevation": float(venue.elevation)
-                            if venue.elevation
-                            else None,
+                            "elevation": (
+                                float(venue.elevation) if venue.elevation else None
+                            ),
                             "capacity": venue.capacity,
                             "construction_year": venue.construction_year,
                             "grass": venue.grass,
@@ -100,9 +103,11 @@ class Command(BaseCommand):
                             "color": team.color,
                             "alternate_color": team.alternate_color,
                             "twitter": team.twitter,
-                            "location": Venue.objects.get(id=team.location.id)
-                            if team.location and team.location.id
-                            else None,
+                            "location": (
+                                Venue.objects.get(id=team.location.id)
+                                if team.location and team.location.id
+                                else None
+                            ),
                         },
                     )
                     for logo in team.logos or []:
