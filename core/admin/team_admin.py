@@ -3,6 +3,8 @@ from django.templatetags.static import static
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
 
+from core.forms import TeamForm
+
 from core.models.team import Team, TeamAlternativeName, TeamLogo
 
 
@@ -33,6 +35,7 @@ class TeamLogoInline(TabularInline):
 
 @admin.register(Team)
 class TeamAdmin(ModelAdmin):
+    form = TeamForm
     search_fields = ("school", "mascot")
     list_display = (
         "logo_display",
