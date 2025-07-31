@@ -1,12 +1,12 @@
 from django.db import models
 from django.utils.text import slugify
 
+from core.models.conference import Conference
+from core.models.enums import DivisionClassification
 from core.models.venue import Venue
-from core.models.conference import Conference, DivisionClassification
 
 
 class Team(models.Model):
-
     """
     Represents a sports team.
     """

@@ -82,11 +82,12 @@ class Command(BaseCommand):
                 for team in teams_response:
                     conference_obj = None
                     if team.conference:
-                        conference_obj = Conference.objects.filter(
-                            abbreviation=team.conference
-                        ).first() or Conference.objects.filter(
-                            name=team.conference
-                        ).first()
+                        conference_obj = (
+                            Conference.objects.filter(
+                                abbreviation=team.conference
+                            ).first()
+                            or Conference.objects.filter(name=team.conference).first()
+                        )
 
                     new_team, _ = Team.objects.update_or_create(
                         id=team.id,

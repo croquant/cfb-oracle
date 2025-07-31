@@ -1,13 +1,6 @@
 from django.db import models
 
-
-class DivisionClassification(models.TextChoices):
-    """Enumeration for NCAA division classification."""
-
-    FBS = "fbs", "FBS"
-    FCS = "fcs", "FCS"
-    II = "ii", "Division II"
-    III = "iii", "Division III"
+from core.models.enums import DivisionClassification
 
 
 class Conference(models.Model):
@@ -15,7 +8,7 @@ class Conference(models.Model):
 
     name = models.CharField(max_length=200)
     short_name = models.CharField(max_length=100, null=True, blank=True)
-    abbreviation = models.CharField(max_length=20, unique=True)
+    abbreviation = models.CharField(max_length=20, null=True, blank=True)
     classification = models.CharField(
         max_length=10,
         choices=DivisionClassification.choices,
