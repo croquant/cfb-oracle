@@ -15,8 +15,43 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
     change_password_form = AdminPasswordChangeForm
+    fieldsets = tuple(
+        (
+            name,
+            {
+                **opts,
+                "classes": opts.get("classes", ()) + ("tab",),
+            },
+        )
+        for name, opts in BaseUserAdmin.fieldsets
+    )
+    add_fieldsets = tuple(
+        (
+            name,
+            {
+                **opts,
+                "classes": opts.get("classes", ()) + ("tab",),
+            },
+        )
+        for name, opts in BaseUserAdmin.add_fieldsets
+    )
 
 
 @admin.register(Group)
 class GroupAdmin(BaseGroupAdmin, ModelAdmin):
-    pass
+    fieldsets = (
+        (
+            "Group Info",
+            {
+                "fields": ("name",),
+                "classes": ("tab",),
+            },
+        ),
+        (
+            "Permissions",
+            {
+                "fields": ("permissions",),
+                "classes": ("tab",),
+            },
+        ),
+    )
