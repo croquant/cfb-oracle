@@ -91,12 +91,20 @@ class Command(BaseCommand):
         """
 
         teams_response = api_instance.get_teams(conference=conference, year=year)
+
+        # Preload related objects so we do not hit the database for every team
+        # iteration. ``in_bulk`` returns a dictionary mapping the provided
+        # ``field_name`` to the corresponding model instance.
+        conferences_by_abbrev = Conference.objects.in_bulk(field_name="abbreviation")
+        conferences_by_name = Conference.objects.in_bulk(field_name="name")
+        venues_by_id = Venue.objects.in_bulk()  # defaults to primary key lookups
+
         for team in teams_response:
             conference_obj = None
             if team.conference:
                 conference_obj = (
-                    Conference.objects.filter(abbreviation=team.conference).first()
-                    or Conference.objects.filter(name=team.conference).first()
+                    conferences_by_abbrev.get(team.conference)
+                    or conferences_by_name.get(team.conference)
                 )
 
             new_team, _ = Team.objects.update_or_create(
@@ -111,7 +119,7 @@ class Command(BaseCommand):
                     "alternate_color": team.alternate_color,
                     "twitter": team.twitter,
                     "location": (
-                        Venue.objects.get(id=team.location.id)
+                        venues_by_id.get(team.location.id)
                         if team.location and team.location.id
                         else None
                     ),
