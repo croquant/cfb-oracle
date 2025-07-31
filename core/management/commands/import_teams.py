@@ -76,9 +76,7 @@ class Command(BaseCommand):
                     "classification": conf.classification,
                 },
             )
-            self.stdout.write(
-                f"Conference {conf.name} imported/updated successfully."
-            )
+            self.stdout.write(f"Conference {conf.name} imported/updated successfully.")
 
     def import_teams(self, api_instance, *, conference=None, year=None):
         """Fetch team data and related records from CFBD.
@@ -101,7 +99,7 @@ class Command(BaseCommand):
         conferences_by_abbrev = {
             c.abbreviation: c for c in conferences.values() if c.abbreviation
         }
-        conferences_by_name = {c.name: c for c in conferences.values()}
+        conferences_by_name = {c.name: c for c in conferences.values() if c.name}
 
         # ``in_bulk`` without ``field_name`` defaults to the primary key, which
         # is already unique for venues. We can therefore use the returned
@@ -111,10 +109,9 @@ class Command(BaseCommand):
         for team in teams_response:
             conference_obj = None
             if team.conference:
-                conference_obj = (
-                    conferences_by_abbrev.get(team.conference)
-                    or conferences_by_name.get(team.conference)
-                )
+                conference_obj = conferences_by_abbrev.get(
+                    team.conference
+                ) or conferences_by_name.get(team.conference)
 
             new_team, _ = Team.objects.update_or_create(
                 id=team.id,
