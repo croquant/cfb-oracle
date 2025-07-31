@@ -1,5 +1,6 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin, TabularInline
+from django.utils.translation import gettext_lazy as _
 
 from core.models.team import Team, TeamAlternativeName, TeamLogo
 
@@ -28,6 +29,42 @@ class TeamAdmin(ModelAdmin):
     )
     list_filter_sheet = False
     inlines = [TeamAlternativeNameTabularInline, TeamLogoInline]
+
+    fieldsets = (
+        (
+            _("Basic Info"),
+            {
+                "fields": (
+                    "school",
+                    "mascot",
+                    "abbreviation",
+                    "slug",
+                    "conference",
+                    "classification",
+                )
+            },
+        ),
+        (
+            _("Colors & Social"),
+            {
+                "fields": (
+                    "color",
+                    "alternate_color",
+                    "twitter",
+                ),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            _("Location"),
+            {
+                "fields": (
+                    "location",
+                ),
+                "classes": ("collapse",),
+            },
+        ),
+    )
 
 
 @admin.register(TeamAlternativeName)
