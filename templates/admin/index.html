@@ -17,27 +17,23 @@
 {% endblock %}
 
 {% block content %}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <a href="{% url 'admin:core_team_changelist' %}"
-           class="bg-white dark:bg-base-800 border border-base-200 dark:border-base-700 rounded-default p-6 shadow flex flex-col items-center text-center hover:bg-primary-50 dark:hover:bg-base-700">
-            <span class="material-symbols-outlined text-4xl text-primary-600 mb-2">groups</span>
-            <span class="font-semibold text-base-900 dark:text-base-100">Teams</span>
-        </a>
+    <div class="flex flex-col lg:flex-row lg:gap-8">
+        <div class="grow">
+            {% include "unfold/components/title.html" with children=_('Editors') class="mb-4" %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {% url 'admin:core_team_changelist' as team_url %}
+                {% include "unfold/components/card.html" with href=team_url icon="groups" class="items-center text-center" children=_('Teams') %}
 
-        <a href="{% url 'admin:core_conference_changelist' %}"
-           class="bg-white dark:bg-base-800 border border-base-200 dark:border-base-700 rounded-default p-6 shadow flex flex-col items-center text-center hover:bg-primary-50 dark:hover:bg-base-700">
-            <span class="material-symbols-outlined text-4xl text-primary-600 mb-2">public</span>
-            <span class="font-semibold text-base-900 dark:text-base-100">Conferences</span>
-        </a>
+                {% url 'admin:core_conference_changelist' as conf_url %}
+                {% include "unfold/components/card.html" with href=conf_url icon="public" class="items-center text-center" children=_('Conferences') %}
 
-        <a href="{% url 'admin:core_venue_changelist' %}"
-           class="bg-white dark:bg-base-800 border border-base-200 dark:border-base-700 rounded-default p-6 shadow flex flex-col items-center text-center hover:bg-primary-50 dark:hover:bg-base-700">
-            <span class="material-symbols-outlined text-4xl text-primary-600 mb-2">stadium</span>
-            <span class="font-semibold text-base-900 dark:text-base-100">Venues</span>
-        </a>
-    </div>
+                {% url 'admin:core_venue_changelist' as venue_url %}
+                {% include "unfold/components/card.html" with href=venue_url icon="stadium" class="items-center text-center" children=_('Venues') %}
+            </div>
 
-    <div class="mt-8">
+            {% include "unfold/helpers/app_list_default.html" %}
+        </div>
+
         {% include "unfold/helpers/history.html" %}
     </div>
 {% endblock %}
