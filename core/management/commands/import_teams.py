@@ -93,11 +93,20 @@ class Command(BaseCommand):
         teams_response = api_instance.get_teams(conference=conference, year=year)
 
         # Preload related objects so we do not hit the database for every team
-        # iteration. ``in_bulk`` returns a dictionary mapping the provided
-        # ``field_name`` to the corresponding model instance.
-        conferences_by_abbrev = Conference.objects.in_bulk(field_name="abbreviation")
-        conferences_by_name = Conference.objects.in_bulk(field_name="name")
-        venues_by_id = Venue.objects.in_bulk()  # defaults to primary key lookups
+        # iteration. ``in_bulk`` performs a single query returning a dictionary
+        # of objects keyed by the requested field, in this case the primary key.
+        # We then construct lookup dictionaries keyed by abbreviation and name
+        # from that result set.
+        conferences = Conference.objects.in_bulk()
+        conferences_by_abbrev = {
+            c.abbreviation: c for c in conferences.values() if c.abbreviation
+        }
+        conferences_by_name = {c.name: c for c in conferences.values()}
+
+        # ``in_bulk`` without ``field_name`` defaults to the primary key, which
+        # is already unique for venues. We can therefore use the returned
+        # dictionary directly for ID lookups.
+        venues_by_id = Venue.objects.in_bulk()
 
         for team in teams_response:
             conference_obj = None
