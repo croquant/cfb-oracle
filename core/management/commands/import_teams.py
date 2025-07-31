@@ -5,6 +5,7 @@ from cfbd.rest import ApiException
 from django.core.management.base import BaseCommand
 from dotenv import load_dotenv
 
+from core.models.conference import Conference
 from core.models.team import Team, TeamAlternativeName, TeamLogo
 from core.models.venue import Venue
 
@@ -30,6 +31,7 @@ class Command(BaseCommand):
         with cfbd.ApiClient(configuration) as api_client:
             venues_api_instance = cfbd.VenuesApi(api_client)
             teams_api_instance = cfbd.TeamsApi(api_client)
+            conferences_api_instance = cfbd.ConferencesApi(api_client)
 
             try:
                 venues_response = venues_api_instance.get_venues()
@@ -58,18 +60,42 @@ class Command(BaseCommand):
                         f"Venue {venue.name} ({venue.city}, {venue.state}) imported/updated successfully."
                     )
 
+                conferences_response = conferences_api_instance.get_conferences()
+                for conf in conferences_response:
+                    Conference.objects.update_or_create(
+                        id=conf.id,
+                        defaults={
+                            "name": conf.name,
+                            "short_name": conf.short_name,
+                            "abbreviation": conf.abbreviation,
+                            "classification": conf.classification,
+                        },
+                    )
+                    self.stdout.write(
+                        f"Conference {conf.name} imported/updated successfully."
+                    )
+
                 teams_response = teams_api_instance.get_teams(
                     conference=options.get("conference"),
                     year=options.get("year"),
                 )
                 for team in teams_response:
+                    conference_obj = None
+                    if team.conference:
+                        conference_obj = (
+                            Conference.objects.filter(
+                                abbreviation=team.conference
+                            ).first()
+                            or Conference.objects.filter(name=team.conference).first()
+                        )
+
                     new_team, _ = Team.objects.update_or_create(
                         id=team.id,
                         defaults={
                             "school": team.school,
                             "mascot": team.mascot,
                             "abbreviation": team.abbreviation,
-                            "conference": team.conference,
+                            "conference": conference_obj,
                             "classification": team.classification,
                             "color": team.color,
                             "alternate_color": team.alternate_color,

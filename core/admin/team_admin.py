@@ -39,7 +39,7 @@ class TeamAdmin(ModelAdmin):
         "abbreviation",
         "conference",
     )
-    list_select_related = ("location",)
+    list_select_related = ("location", "conference")
     list_filter = (
         "classification",
         "conference",
