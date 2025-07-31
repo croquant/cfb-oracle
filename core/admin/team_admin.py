@@ -4,6 +4,8 @@ from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
 from unfold.contrib.inlines.admin import NonrelatedStackedInline
 
+from core.forms import TeamForm
+
 from core.models.team import Team, TeamAlternativeName, TeamLogo
 from core.models.venue import Venue
 
@@ -70,6 +72,7 @@ class VenueInline(NonrelatedStackedInline):
 
 @admin.register(Team)
 class TeamAdmin(ModelAdmin):
+    form = TeamForm
     search_fields = ("school", "mascot")
     list_display = (
         "logo_display",
