@@ -1,8 +1,8 @@
 import os
 from pathlib import Path
 
-from dotenv import load_dotenv
 from django.urls import reverse
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -134,17 +134,18 @@ UNFOLD = {
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": False,
     "SHOW_BACK_BUTTON": True,
+    "BORDER_RADIUS": "0px",
     "SIDEBAR": {
-        "show_search": True,
-        "show_all_applications": True,
         "navigation": [
             {
-                "title": "CFB Oracle",
+                "title": "Edit",
                 "items": [
                     {
                         "title": "Conferences",
-                        "icon": "emoji_events",
-                        "link": lambda request: reverse("admin:core_conference_changelist"),
+                        "icon": "flag",
+                        "link": lambda request: reverse(
+                            "admin:core_conference_changelist"
+                        ),
                     },
                     {
                         "title": "Teams",
@@ -159,8 +160,9 @@ UNFOLD = {
                 ],
             },
             {
-                "title": "Administration",
+                "title": "User Management",
                 "separator": True,
+                "collapsible": True,
                 "items": [
                     {
                         "title": "Users",
