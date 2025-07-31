@@ -45,7 +45,8 @@ class Team(models.Model):
         verbose_name_plural = "teams"
 
     def __str__(self):
-        return f"{self.school} {self.mascot} ({self.abbreviation})"
+        mascot = f" {self.mascot}" if self.mascot else ""
+        return f"{self.school}{mascot}"
 
     def save(self, *args, **kwargs):
         if not self.slug or self.slug == "" or slugify(self.school) not in self.slug:
@@ -80,7 +81,7 @@ class TeamAlternativeName(models.Model):
         verbose_name_plural = "team alternative names"
 
     def __str__(self):
-        return f"{self.name} ({self.team.abbreviation})"
+        return f"{self.name} ({self.team.school})"
 
 
 class TeamLogo(models.Model):
@@ -92,7 +93,7 @@ class TeamLogo(models.Model):
     url = models.URLField()
 
     def __str__(self):
-        return f"Logo for {self.team.abbreviation}: {self.url}"
+        return f"Logo for {self.team.school}: {self.url}"
 
     class Meta:
         verbose_name = "team logo"
