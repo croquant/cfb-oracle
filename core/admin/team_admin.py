@@ -39,6 +39,7 @@ class TeamAdmin(ModelAdmin):
         "abbreviation",
         "conference",
     )
+    list_select_related = ("location",)
     list_filter = (
         "classification",
         "conference",
@@ -47,6 +48,16 @@ class TeamAdmin(ModelAdmin):
     # readonly_fields = ("logo_display", "slug")
     prepopulated_fields = {"slug": ("school",)}
     inlines = [TeamAlternativeNameTabularInline, TeamLogoInline]
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        if (
+            request.resolver_match
+            and request.resolver_match.url_name
+            and request.resolver_match.url_name.endswith("_changelist")
+        ):
+            queryset = queryset.prefetch_related("alternative_names", "logos")
+        return queryset
 
     def logo_display(self, obj):
         logo = obj.logos.first()
