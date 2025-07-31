@@ -2,8 +2,11 @@ from django.contrib import admin
 from django.templatetags.static import static
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
+from unfold.contrib.inlines.admin import NonrelatedStackedInline
 
 from core.models.team import Team, TeamAlternativeName, TeamLogo
+from core.models.venue import Venue
+from core.forms.team_forms import TeamAdminForm
 
 
 class TeamAlternativeNameTabularInline(TabularInline):
@@ -31,6 +34,41 @@ class TeamLogoInline(TabularInline):
     preview.short_description = "Logo"
 
 
+class VenueInline(NonrelatedStackedInline):
+    model = Venue
+    extra = 0
+    max_num = 1
+    can_delete = False
+    hide_title = True
+    tab = True
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "name",
+                    ("city", "state"),
+                    ("zip_code", "country_code"),
+                    "timezone",
+                    ("latitude", "longitude"),
+                    "elevation",
+                    "capacity",
+                    "construction_year",
+                    ("grass", "dome"),
+                )
+            },
+        ),
+    )
+
+    def get_form_queryset(self, obj):
+        if obj and obj.location:
+            return Venue.objects.filter(pk=obj.location.pk)
+        return Venue.objects.none()
+
+    def save_new_instance(self, parent, obj):
+        parent.location = obj
+
+
 @admin.register(Team)
 class TeamAdmin(ModelAdmin):
     search_fields = ("school", "mascot")
@@ -48,7 +86,8 @@ class TeamAdmin(ModelAdmin):
     )
     list_filter_sheet = False
     prepopulated_fields = {"slug": ("school",)}
-    inlines = [TeamAlternativeNameTabularInline, TeamLogoInline]
+    form = TeamAdminForm
+    inlines = [VenueInline, TeamAlternativeNameTabularInline, TeamLogoInline]
     fieldsets = (
         (
             None,
@@ -59,7 +98,6 @@ class TeamAdmin(ModelAdmin):
                     ("classification", "conference"),
                     ("color", "alternate_color"),
                     "twitter",
-                    "location",
                 ),
             },
         ),
