@@ -2,14 +2,10 @@ from django.db import models
 from django.utils.text import slugify
 
 from core.models.venue import Venue
+from core.models.conference import Conference, DivisionClassification
 
 
 class Team(models.Model):
-    class Classification(models.TextChoices):
-        FBS = "fbs", "FBS"
-        FCS = "fcs", "FCS"
-        II = "ii", "Division II"
-        III = "iii", "Division III"
 
     """
     Represents a sports team.
@@ -19,10 +15,16 @@ class Team(models.Model):
     mascot = models.CharField(max_length=100, null=True, blank=True)
     abbreviation = models.CharField(max_length=20, null=True, blank=True)
     slug = models.SlugField(max_length=50, unique=True)
-    conference = models.CharField(max_length=100, null=True, blank=True)
+    conference = models.ForeignKey(
+        Conference,
+        on_delete=models.SET_NULL,
+        related_name="teams",
+        null=True,
+        blank=True,
+    )
     classification = models.CharField(
         max_length=100,
-        choices=Classification.choices,
+        choices=DivisionClassification.choices,
         null=True,
         blank=True,
     )
