@@ -5,9 +5,9 @@ from core.models.team import Team
 
 
 class ColorPreviewWidget(forms.TextInput):
-    """TextInput widget that displays a color picker with preview box."""
+    """TextInput widget that displays a live color preview box."""
 
-    input_type = "color"
+    input_type = "text"
 
     def render(self, name, value, attrs=None, renderer=None):
         attrs = attrs or {}
