@@ -4,12 +4,12 @@ from unfold.admin import ModelAdmin, TabularInline
 from core.models.team import Team, TeamAlternativeName, TeamLogo
 
 
-class MyStackedInline(TabularInline):
+class TeamAlternativeNameTabularInline(TabularInline):
     model = TeamAlternativeName
     hide_title = True
 
 
-class MyTabularInline(TabularInline):
+class TeamLogoInline(TabularInline):
     model = TeamLogo
 
 
@@ -21,7 +21,7 @@ class TeamAdmin(ModelAdmin):
         "conference",
     )
     list_filter_sheet = False
-    inlines = [MyStackedInline, MyTabularInline]
+    inlines = [TeamAlternativeNameTabularInline, TeamLogoInline]
 
 
 @admin.register(TeamAlternativeName)
