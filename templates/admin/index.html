@@ -1,6 +1,6 @@
 {% extends 'admin/base.html' %}
 
-{% load i18n %}
+{% load i18n unfold %}
 
 {% block breadcrumbs %}{% endblock %}
 
@@ -13,27 +13,27 @@
 {% endblock %}
 
 {% block branding %}
-    {% include "unfold/helpers/site_branding.html" %}
+    {% component "unfold/helpers/site_branding.html" %}{% endcomponent %}
 {% endblock %}
 
 {% block content %}
     <div class="flex flex-col lg:flex-row lg:gap-8">
         <div class="grow">
-            {% include "unfold/components/title.html" with children=_('Editors') class="mb-4" %}
+            {% component "unfold/components/title.html" with children=_('Editors') class="mb-4" %}{% endcomponent %}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {% url 'admin:core_team_changelist' as team_url %}
-                {% include "unfold/components/card.html" with href=team_url icon="groups" class="items-center text-center" children=_('Teams') %}
+                {% component "unfold/components/card.html" with href=team_url icon="groups" class="items-center text-center" children=_('Teams') %}{% endcomponent %}
 
                 {% url 'admin:core_conference_changelist' as conf_url %}
-                {% include "unfold/components/card.html" with href=conf_url icon="public" class="items-center text-center" children=_('Conferences') %}
+                {% component "unfold/components/card.html" with href=conf_url icon="public" class="items-center text-center" children=_('Conferences') %}{% endcomponent %}
 
                 {% url 'admin:core_venue_changelist' as venue_url %}
-                {% include "unfold/components/card.html" with href=venue_url icon="stadium" class="items-center text-center" children=_('Venues') %}
+                {% component "unfold/components/card.html" with href=venue_url icon="stadium" class="items-center text-center" children=_('Venues') %}{% endcomponent %}
             </div>
 
-            {% include "unfold/helpers/app_list_default.html" %}
+            {% component "unfold/helpers/app_list_default.html" %}{% endcomponent %}
         </div>
 
-        {% include "unfold/helpers/history.html" %}
+        {% component "unfold/helpers/history.html" %}{% endcomponent %}
     </div>
 {% endblock %}
