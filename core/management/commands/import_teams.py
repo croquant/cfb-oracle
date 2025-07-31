@@ -76,9 +76,7 @@ class Command(BaseCommand):
                     "classification": conf.classification,
                 },
             )
-            self.stdout.write(
-                f"Conference {conf.name} imported/updated successfully."
-            )
+            self.stdout.write(f"Conference {conf.name} imported/updated successfully.")
 
     def import_teams(self, api_instance, *, conference=None, year=None):
         """Fetch team data and related records from CFBD.
@@ -91,13 +89,29 @@ class Command(BaseCommand):
         """
 
         teams_response = api_instance.get_teams(conference=conference, year=year)
+
+        # Preload related objects so we do not hit the database for every team
+        # iteration. ``in_bulk`` performs a single query returning a dictionary
+        # of objects keyed by the requested field, in this case the primary key.
+        # We then construct lookup dictionaries keyed by abbreviation and name
+        # from that result set.
+        conferences = Conference.objects.in_bulk()
+        conferences_by_abbrev = {
+            c.abbreviation: c for c in conferences.values() if c.abbreviation
+        }
+        conferences_by_name = {c.name: c for c in conferences.values() if c.name}
+
+        # ``in_bulk`` without ``field_name`` defaults to the primary key, which
+        # is already unique for venues. We can therefore use the returned
+        # dictionary directly for ID lookups.
+        venues_by_id = Venue.objects.in_bulk()
+
         for team in teams_response:
             conference_obj = None
             if team.conference:
-                conference_obj = (
-                    Conference.objects.filter(abbreviation=team.conference).first()
-                    or Conference.objects.filter(name=team.conference).first()
-                )
+                conference_obj = conferences_by_abbrev.get(
+                    team.conference
+                ) or conferences_by_name.get(team.conference)
 
             new_team, _ = Team.objects.update_or_create(
                 id=team.id,
@@ -111,7 +125,7 @@ class Command(BaseCommand):
                     "alternate_color": team.alternate_color,
                     "twitter": team.twitter,
                     "location": (
-                        Venue.objects.get(id=team.location.id)
+                        venues_by_id.get(team.location.id)
                         if team.location and team.location.id
                         else None
                     ),
