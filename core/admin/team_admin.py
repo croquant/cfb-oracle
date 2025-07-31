@@ -6,7 +6,6 @@ from unfold.contrib.inlines.admin import NonrelatedStackedInline
 
 from core.models.team import Team, TeamAlternativeName, TeamLogo
 from core.models.venue import Venue
-from core.forms.team_forms import TeamAdminForm
 
 
 class TeamAlternativeNameTabularInline(TabularInline):
@@ -86,7 +85,6 @@ class TeamAdmin(ModelAdmin):
     )
     list_filter_sheet = False
     prepopulated_fields = {"slug": ("school",)}
-    form = TeamAdminForm
     inlines = [VenueInline, TeamAlternativeNameTabularInline, TeamLogoInline]
     fieldsets = (
         (
