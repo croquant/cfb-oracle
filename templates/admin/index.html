@@ -17,5 +17,19 @@
 {% endblock %}
 
 {% block content %}
-    Start creating your own Tailwind components here
+    {% url 'admin:core_team_changelist' as teams_url %}
+    {% url 'admin:core_venue_changelist' as venues_url %}
+
+    <div class="flex flex-col lg:flex-row lg:gap-8">
+        <div class="grow">
+            <div class="grid gap-6 md:grid-cols-2 mb-8">
+                {% include "unfold/components/card.html" with href=teams_url title="Teams" icon="groups" children="Manage team information" %}
+                {% include "unfold/components/card.html" with href=venues_url title="Venues" icon="stadium" children="Manage venue details" %}
+            </div>
+
+            {% include "unfold/helpers/app_list_default.html" %}
+        </div>
+
+        {% include "unfold/helpers/history.html" %}
+    </div>
 {% endblock %}
