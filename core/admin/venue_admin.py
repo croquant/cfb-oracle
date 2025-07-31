@@ -20,3 +20,29 @@ class VenueAdmin(ModelAdmin):
     )
     list_filter_sheet = False
     search_fields = ("name", "city", "state")
+    fieldsets = (
+        (
+            "General",
+            {
+                "fields": (
+                    "name",
+                    ("city", "state"),
+                    ("zip_code", "country_code"),
+                    ("capacity", "construction_year"),
+                ),
+                "classes": ("tab",),
+            },
+        ),
+        (
+            "Location",
+            {
+                "fields": (
+                    "timezone",
+                    ("latitude", "longitude"),
+                    "elevation",
+                    ("grass", "dome"),
+                ),
+                "classes": ("tab",),
+            },
+        ),
+    )

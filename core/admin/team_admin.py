@@ -88,15 +88,24 @@ class TeamAdmin(ModelAdmin):
     inlines = [VenueInline, TeamAlternativeNameTabularInline, TeamLogoInline]
     fieldsets = (
         (
-            None,
+            "General",
             {
                 "fields": (
                     ("school", "mascot"),
                     ("slug", "abbreviation"),
                     ("classification", "conference"),
+                ),
+                "classes": ("tab",),
+            },
+        ),
+        (
+            "Extras",
+            {
+                "fields": (
                     ("color", "alternate_color"),
                     "twitter",
                 ),
+                "classes": ("tab",),
             },
         ),
     )

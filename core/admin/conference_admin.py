@@ -10,3 +10,15 @@ class ConferenceAdmin(ModelAdmin):
     list_filter = ("classification",)
     search_fields = ("name", "short_name", "abbreviation")
     list_filter_sheet = False
+    fieldsets = (
+        (
+            "General",
+            {
+                "fields": (
+                    ("name", "short_name"),
+                    ("abbreviation", "classification"),
+                ),
+                "classes": ("tab",),
+            },
+        ),
+    )
