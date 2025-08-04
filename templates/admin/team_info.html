@@ -43,30 +43,51 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                     <h3 class="text-lg font-semibold mb-2">Latest Results</h3>
-                    <div id="completed-matches" class="space-y-2"></div>
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 text-left">Date</th>
+                                <th class="px-4 py-2 text-left">Opponent</th>
+                                <th class="px-4 py-2 text-left">Score</th>
+                                <th class="px-4 py-2 text-left">Venue</th>
+                                <th class="px-4 py-2 text-left">Attendance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="completed-matches-body"></tbody>
+                    </table>
                 </div>
                 <div x-show="team.upcoming_matches.length">
                     <h3 class="text-lg font-semibold mb-2">Upcoming Matches</h3>
-                    <div class="space-y-2">
-                        <template x-for="match in team.upcoming_matches" :key="match.id">
-                            <a :href="match.url || '#'" class="block bg-white rounded shadow p-4 hover:bg-gray-50">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center space-x-2">
-                                        <img :src="match.home.logo" class="h-8 w-8 object-contain" />
-                                        <span x-text="match.home.name" :class="{'font-bold': match.is_home}"></span>
-                                    </div>
-                                    <div class="text-center text-sm text-gray-500">
-                                        <div x-text="match.date"></div>
-                                        <div x-text="match.venue"></div>
-                                    </div>
-                                    <div class="flex items-center space-x-2">
-                                        <span x-text="match.away.name" :class="{'font-bold': !match.is_home}"></span>
-                                        <img :src="match.away.logo" class="h-8 w-8 object-contain" />
-                                    </div>
-                                </div>
-                            </a>
-                        </template>
-                    </div>
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 text-left">Date</th>
+                                <th class="px-4 py-2 text-left">Home</th>
+                                <th class="px-4 py-2 text-left">Away</th>
+                                <th class="px-4 py-2 text-left">Venue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="match in team.upcoming_matches" :key="match.id">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-2" x-text="match.date"></td>
+                                    <td class="px-4 py-2">
+                                        <div class="flex items-center space-x-2">
+                                            <img :src="match.home.logo" class="h-6 w-6 object-contain" />
+                                            <span x-text="match.home.name" :class="{'font-bold': match.is_home}"></span>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-2">
+                                        <div class="flex items-center space-x-2">
+                                            <span x-text="match.away.name" :class="{'font-bold': !match.is_home}"></span>
+                    <img :src="match.away.logo" class="h-6 w-6 object-contain" />
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-2" x-text="match.venue"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -97,7 +118,7 @@ function teamInfo() {
                     this.team = data;
                     this.query = data.school;
                     this.results = [];
-                    htmx.ajax('GET', `${window.location.pathname}${item.id}/results/`, {target: '#completed-matches'});
+                    htmx.ajax('GET', `${window.location.pathname}${item.id}/results/`, {target: '#completed-matches-body'});
                 });
         }
     }

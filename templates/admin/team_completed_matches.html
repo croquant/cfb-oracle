@@ -1,23 +1,19 @@
 {% for match in matches %}
-<a href="{{ match.url|default:'#' }}" class="block bg-white rounded shadow p-4 hover:bg-gray-50">
-    <div class="flex items-center justify-between">
+<tr class="hover:bg-gray-50 cursor-pointer" {% if match.url %}onclick="window.location='{{ match.url }}'"{% endif %}>
+    <td class="px-4 py-2">{{ match.date }}</td>
+    <td class="px-4 py-2">
         <div class="flex items-center space-x-2">
-            {% if match.team_logo %}<img src="{{ match.team_logo }}" class="h-8 w-8 object-contain" />{% endif %}
-            <span class="font-semibold {{ match.result_class }}">{{ match.team_score }}</span>
-        </div>
-        <span class="font-bold {{ match.result_class }}">{{ match.result }}</span>
-        <div class="flex items-center space-x-2">
-            <span class="font-semibold">{{ match.opponent_score }}</span>
-            {% if match.opponent_logo %}<img src="{{ match.opponent_logo }}" class="h-8 w-8 object-contain" />{% endif %}
+            {% if match.opponent_logo %}<img src="{{ match.opponent_logo }}" class="h-6 w-6 object-contain" />{% endif %}
             <span>{{ match.opponent }}</span>
         </div>
-    </div>
-    <div class="mt-2 flex justify-between text-sm text-gray-600">
-        <span>{{ match.date }} &middot; {{ match.venue }}</span>
-        <span>Att: {{ match.attendance|default:"-" }}</span>
-    </div>
-</a>
+    </td>
+    <td class="px-4 py-2 font-semibold {{ match.result_class }}">{{ match.team_score }} - {{ match.opponent_score }}</td>
+    <td class="px-4 py-2">{{ match.venue }}</td>
+    <td class="px-4 py-2 text-right">{{ match.attendance|default:"-" }}</td>
+</tr>
 {% endfor %}
 {% if next_page %}
-<div hx-get="{% url 'admin:team-info-results' team_id %}?page={{ next_page }}" hx-trigger="revealed" hx-swap="afterend"></div>
+<tr hx-get="{% url 'admin:team-info-results' team_id %}?page={{ next_page }}" hx-trigger="revealed" hx-swap="afterend">
+    <td colspan="5"></td>
+</tr>
 {% endif %}
