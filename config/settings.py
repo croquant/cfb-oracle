@@ -197,6 +197,16 @@ UNFOLD = {
                 ],
             },
             {
+                "title": "Dashboards",
+                "items": [
+                    {
+                        "title": "Team Info",
+                        "icon": "info",
+                        "link": lambda request: reverse("admin:team-info"),
+                    },
+                ],
+            },
+            {
                 "title": "User Management",
                 "separator": True,
                 "collapsible": True,
