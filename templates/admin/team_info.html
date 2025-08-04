@@ -1,0 +1,88 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div class="p-6" x-data="teamInfo()">
+    <div class="max-w-xl mx-auto">
+        <input type="text" placeholder="Search teams" x-model="query" @input.debounce.300ms="searchTeams" class="w-full px-4 py-2 border rounded" />
+        <ul class="bg-white border rounded mt-1" x-show="results.length">
+            <template x-for="item in results" :key="item.id">
+                <li @click="selectTeam(item)" class="px-4 py-2 cursor-pointer hover:bg-gray-100" x-text="item.name"></li>
+            </template>
+        </ul>
+    </div>
+
+    <template x-if="team">
+        <div class="mt-6 space-y-6">
+            <div class="bg-white rounded shadow p-4">
+                <div class="flex flex-col md:flex-row md:items-center md:space-x-4">
+                    <template x-if="team.logos.length">
+                        <img :src="team.logos[0]" class="h-24 w-24 object-contain" />
+                    </template>
+                    <div>
+                        <h2 class="text-2xl font-bold" x-text="team.school"></h2>
+                        <p class="text-gray-600" x-text="team.mascot"></p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4 text-sm">
+                    <div><strong>Abbreviation:</strong> <span x-text="team.abbreviation"></span></div>
+                    <div><strong>Classification:</strong> <span x-text="team.classification"></span></div>
+                    <div><strong>Colors:</strong> <span x-text="team.color"></span>, <span x-text="team.alternate_color"></span></div>
+                    <div><strong>Twitter:</strong> <span x-text="team.twitter"></span></div>
+                    <div><strong>Location:</strong> <span x-text="team.location"></span></div>
+                </div>
+                <div class="flex space-x-2 mt-4" x-show="team.logos.length > 1">
+                    <template x-for="logo in team.logos.slice(1)" :key="logo">
+                        <img :src="logo" class="h-12 w-12 object-contain" />
+                    </template>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-semibold mb-2">Recent Matches</h3>
+                <div class="space-y-2">
+                    <template x-for="match in team.matches" :key="match.id">
+                        <a :href="match.url || '#'" class="block bg-white rounded border p-3 hover:bg-gray-50">
+                            <div class="flex justify-between">
+                                <span x-text="match.opponent"></span>
+                                <span x-text="match.date"></span>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                <span x-text="match.result"></span>
+                                <span class="ml-2" x-text="match.venue"></span>
+                            </div>
+                        </a>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </template>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script>
+function teamInfo() {
+    return {
+        query: '',
+        results: [],
+        team: null,
+        searchTeams() {
+            if (this.query.length < 2) {
+                this.results = [];
+                return;
+            }
+            fetch(`${window.location.pathname}search/?q=${encodeURIComponent(this.query)}`)
+                .then(res => res.json())
+                .then(data => { this.results = data.results; });
+        },
+        selectTeam(item) {
+            fetch(`${window.location.pathname}${item.id}/`)
+                .then(res => res.json())
+                .then(data => { this.team = data; this.query = data.school; this.results = []; });
+        }
+    }
+}
+</script>
+{% endblock %}
