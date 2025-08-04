@@ -1,4 +1,5 @@
 import os
+from datetime import date
 
 import cfbd
 from cfbd.rest import ApiException
@@ -7,6 +8,7 @@ from dotenv import load_dotenv
 import time
 
 from core.models.conference import Conference
+from core.models.match import Match
 from core.models.team import Team, TeamAlternativeName, TeamLogo
 from core.models.venue import Venue
 
@@ -22,6 +24,18 @@ class Command(BaseCommand):
             "--year",
             type=int,
             help="Optional year filter to get historical conference affiliations",
+        )
+        parser.add_argument(
+            "--start-year",
+            type=int,
+            default=1869,
+            help="First season year to import games from",
+        )
+        parser.add_argument(
+            "--end-year",
+            type=int,
+            default=date.today().year,
+            help="Last season year to import games from",
         )
 
     def import_venues(self, api_instance):
@@ -146,6 +160,69 @@ class Command(BaseCommand):
                 f"Team {team.school} ({team.abbreviation}) imported/updated successfully."
             )
 
+    def import_games(self, api_instance, *, start_year, end_year):
+        """Fetch game data and store it using the :class:`Match` model.
+
+        Steps:
+        1. Loop over the supplied year range and call :func:`GamesApi.get_games`.
+        2. ``update_or_create`` each :class:`Match` instance linking teams, venues,
+           and conferences where possible.
+        3. Output a status line for every processed game.
+        """
+
+        # Preload related objects for efficient lookup during import
+        teams_by_id = Team.objects.in_bulk()
+        venues_by_id = Venue.objects.in_bulk()
+        conferences = Conference.objects.in_bulk()
+        conferences_by_abbrev = {
+            c.abbreviation: c for c in conferences.values() if c.abbreviation
+        }
+        conferences_by_name = {c.name: c for c in conferences.values() if c.name}
+
+        for season in range(start_year, end_year + 1):
+            games_response = api_instance.get_games(
+                year=season, season_type=cfbd.SeasonType.BOTH
+            )
+            for game in games_response:
+                Match.objects.update_or_create(
+                    id=game.id,
+                    defaults={
+                        "season": game.season,
+                        "week": game.week,
+                        "season_type": game.season_type.value,
+                        "start_date": game.start_date,
+                        "completed": game.completed,
+                        "venue": venues_by_id.get(game.venue_id),
+                        "neutral_site": game.neutral_site,
+                        "attendance": game.attendance,
+                        "home_team": teams_by_id.get(game.home_id),
+                        "home_classification": (
+                            game.home_classification.value
+                            if game.home_classification
+                            else None
+                        ),
+                        "home_conference": conferences_by_abbrev.get(
+                            game.home_conference
+                        )
+                        or conferences_by_name.get(game.home_conference),
+                        "home_score": game.home_points,
+                        "away_team": teams_by_id.get(game.away_id),
+                        "away_classification": (
+                            game.away_classification.value
+                            if game.away_classification
+                            else None
+                        ),
+                        "away_conference": conferences_by_abbrev.get(
+                            game.away_conference
+                        )
+                        or conferences_by_name.get(game.away_conference),
+                        "away_score": game.away_points,
+                    },
+                )
+                self.stdout.write(
+                    f"Match {game.home_team} vs {game.away_team} ({season}) imported/updated successfully."
+                )
+
     def handle(self, *args, **options):
         load_dotenv()
         api_key = os.environ.get("CFBD_API_KEY")
@@ -158,6 +235,7 @@ class Command(BaseCommand):
             venues_api_instance = cfbd.VenuesApi(api_client)
             teams_api_instance = cfbd.TeamsApi(api_client)
             conferences_api_instance = cfbd.ConferencesApi(api_client)
+            games_api_instance = cfbd.GamesApi(api_client)
             total_start = time.perf_counter()
 
             try:
@@ -181,6 +259,16 @@ class Command(BaseCommand):
                 )
                 self.stdout.write(
                     f"Teams import completed in {time.perf_counter() - step_start:.2f} seconds"
+                )
+
+                step_start = time.perf_counter()
+                self.import_games(
+                    games_api_instance,
+                    start_year=options.get("start_year"),
+                    end_year=options.get("end_year"),
+                )
+                self.stdout.write(
+                    f"Games import completed in {time.perf_counter() - step_start:.2f} seconds"
                 )
             except ApiException as e:
                 self.stderr.write(f"Exception when calling CFBD API: {e}\n")
