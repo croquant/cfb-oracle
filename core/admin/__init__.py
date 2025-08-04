@@ -2,6 +2,7 @@ from .base_admin import GroupAdmin, UserAdmin  # noqa: F401
 from .conference_admin import ConferenceAdmin  # noqa: F401
 from .team_admin import TeamAdmin  # noqa: F401
 from .venue_admin import VenueAdmin  # noqa: F401
+from .match_admin import MatchAdmin  # noqa: F401
 
 __all__ = [
     "UserAdmin",
@@ -9,4 +10,5 @@ __all__ = [
     "ConferenceAdmin",
     "TeamAdmin",
     "VenueAdmin",
+    "MatchAdmin",
 ]
