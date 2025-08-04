@@ -20,15 +20,14 @@ class Match(models.Model):
     season_type = models.CharField(
         max_length=20,
         choices=SeasonType.choices,
-        default=SeasonType.REGULAR,
     )
     start_date = models.DateTimeField()
     completed = models.BooleanField(default=False)
-
     venue = models.ForeignKey(
         Venue, on_delete=models.SET_NULL, null=True, blank=True, related_name="matches"
     )
     neutral_site = models.BooleanField(default=False)
+    attendance = models.PositiveIntegerField(blank=True, null=True)
 
     home_team = models.ForeignKey(
         Team, related_name="home_matches", on_delete=models.CASCADE
@@ -36,6 +35,8 @@ class Match(models.Model):
     home_classification = models.CharField(
         max_length=20,
         choices=DivisionClassification.choices,
+        null=True,
+        blank=True,
     )
     home_conference = models.ForeignKey(
         Conference,
@@ -52,6 +53,8 @@ class Match(models.Model):
     away_classification = models.CharField(
         max_length=20,
         choices=DivisionClassification.choices,
+        null=True,
+        blank=True,
     )
     away_conference = models.ForeignKey(
         Conference,
