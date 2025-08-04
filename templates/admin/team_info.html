@@ -40,26 +40,34 @@
                 </div>
             </div>
 
-            <div x-show="team.upcoming_matches.length">
-                <h3 class="text-lg font-semibold mb-2">Upcoming Matches</h3>
-                <div class="space-y-2">
-                    <template x-for="match in team.upcoming_matches" :key="match.id">
-                        <a :href="match.url || '#'" class="block bg-white rounded border p-3 hover:bg-gray-50">
-                            <div class="flex justify-between">
-                                <span x-text="match.opponent"></span>
-                                <span x-text="match.date"></span>
-                            </div>
-                            <div class="text-sm text-gray-600">
-                                <span x-text="match.venue"></span>
-                            </div>
-                        </a>
-                    </template>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Latest Results</h3>
+                    <div id="completed-matches" class="space-y-2"></div>
                 </div>
-            </div>
-
-            <div>
-                <h3 class="text-lg font-semibold mb-2">Latest Results</h3>
-                <div id="completed-matches" class="space-y-2"></div>
+                <div x-show="team.upcoming_matches.length">
+                    <h3 class="text-lg font-semibold mb-2">Upcoming Matches</h3>
+                    <div class="space-y-2">
+                        <template x-for="match in team.upcoming_matches" :key="match.id">
+                            <a :href="match.url || '#'" class="block bg-white rounded shadow p-4 hover:bg-gray-50">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <img :src="match.home.logo" class="h-8 w-8 object-contain" />
+                                        <span x-text="match.home.name" :class="{'font-bold': match.is_home}"></span>
+                                    </div>
+                                    <div class="text-center text-sm text-gray-500">
+                                        <div x-text="match.date"></div>
+                                        <div x-text="match.venue"></div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span x-text="match.away.name" :class="{'font-bold': !match.is_home}"></span>
+                                        <img :src="match.away.logo" class="h-8 w-8 object-contain" />
+                                    </div>
+                                </div>
+                            </a>
+                        </template>
+                    </div>
+                </div>
             </div>
         </div>
     </template>

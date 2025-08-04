@@ -1,12 +1,20 @@
 {% for match in matches %}
-<a href="{{ match.url|default:'#' }}" class="block bg-white rounded border p-3 hover:bg-gray-50">
-    <div class="flex justify-between">
-        <span>{{ match.opponent }}</span>
-        <span>{{ match.date }}</span>
+<a href="{{ match.url|default:'#' }}" class="block bg-white rounded shadow p-4 hover:bg-gray-50">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+            {% if match.team_logo %}<img src="{{ match.team_logo }}" class="h-8 w-8 object-contain" />{% endif %}
+            <span class="font-semibold {{ match.result_class }}">{{ match.team_score }}</span>
+        </div>
+        <span class="font-bold {{ match.result_class }}">{{ match.result }}</span>
+        <div class="flex items-center space-x-2">
+            <span class="font-semibold">{{ match.opponent_score }}</span>
+            {% if match.opponent_logo %}<img src="{{ match.opponent_logo }}" class="h-8 w-8 object-contain" />{% endif %}
+            <span>{{ match.opponent }}</span>
+        </div>
     </div>
-    <div class="text-sm text-gray-600">
-        <span>{{ match.result }}</span>
-        <span class="ml-2">{{ match.venue }}</span>
+    <div class="mt-2 flex justify-between text-sm text-gray-600">
+        <span>{{ match.date }} &middot; {{ match.venue }}</span>
+        <span>Att: {{ match.attendance|default:"-" }}</span>
     </div>
 </a>
 {% endfor %}

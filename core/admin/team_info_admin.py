@@ -40,23 +40,33 @@ def team_detail(request, pk: int):
             Q(home_team=team) | Q(away_team=team), completed=False
         )
         .select_related("home_team", "away_team", "venue")
+        .prefetch_related("home_team__logos", "away_team__logos")
         .order_by("start_date")[:5]
     )
     upcoming_matches = []
     for match in upcoming_qs:
-        if match.home_team_id == team.id:
-            opponent = match.away_team.school
-        else:
-            opponent = match.home_team.school
+        def get_logo(tm):
+            logo = tm.logos.first()
+            return logo.url if logo else ""
+
         try:
             url = reverse("admin:core_match_change", args=[match.pk])
         except NoReverseMatch:
             url = ""
+
         upcoming_matches.append(
             {
                 "id": match.pk,
-                "opponent": opponent,
-                "date": match.start_date.strftime("%Y-%m-%d"),
+                "home": {
+                    "name": match.home_team.school,
+                    "logo": get_logo(match.home_team),
+                },
+                "away": {
+                    "name": match.away_team.school,
+                    "logo": get_logo(match.away_team),
+                },
+                "is_home": match.home_team_id == team.id,
+                "date": match.start_date.strftime("%Y-%m-%d %H:%M"),
                 "venue": match.venue.name if match.venue else "",
                 "url": url,
             }
@@ -83,30 +93,44 @@ def team_detail(request, pk: int):
 def team_completed_matches(request, pk: int):
     team = get_object_or_404(Team, pk=pk)
     page = int(request.GET.get("page", 1))
-    matches_qs = Match.objects.filter(
-        Q(home_team=team) | Q(away_team=team), completed=True
-    ).select_related("home_team", "away_team", "venue")
+    matches_qs = (
+        Match.objects.filter(Q(home_team=team) | Q(away_team=team), completed=True)
+        .select_related("home_team", "away_team", "venue")
+        .prefetch_related("home_team__logos", "away_team__logos")
+    )
     paginator = Paginator(matches_qs, 5)
     page_obj = paginator.get_page(page)
 
     matches = []
     for match in page_obj.object_list:
+        def get_logo(tm):
+            logo = tm.logos.first()
+            return logo.url if logo else ""
+
         if match.home_team_id == team.id:
             opponent = match.away_team.school
+            opponent_logo = get_logo(match.away_team)
+            team_logo = get_logo(match.home_team)
             team_score, opp_score = match.home_score, match.away_score
         else:
             opponent = match.home_team.school
+            opponent_logo = get_logo(match.home_team)
+            team_logo = get_logo(match.away_team)
             team_score, opp_score = match.away_score, match.home_score
 
         if team_score is not None and opp_score is not None:
             if team_score > opp_score:
                 result = "W"
+                result_class = "text-green-600"
             elif team_score < opp_score:
                 result = "L"
+                result_class = "text-red-600"
             else:
                 result = "T"
+                result_class = "text-gray-600"
         else:
             result = ""
+            result_class = "text-gray-600"
 
         try:
             url = reverse("admin:core_match_change", args=[match.pk])
@@ -117,8 +141,14 @@ def team_completed_matches(request, pk: int):
             {
                 "id": match.pk,
                 "opponent": opponent,
+                "team_logo": team_logo,
+                "opponent_logo": opponent_logo,
+                "team_score": team_score,
+                "opponent_score": opp_score,
                 "date": match.start_date.strftime("%Y-%m-%d"),
+                "attendance": match.attendance,
                 "result": result,
+                "result_class": result_class,
                 "venue": match.venue.name if match.venue else "",
                 "url": url,
             }
