@@ -1,0 +1,15 @@
+{% for match in matches %}
+<a href="{{ match.url|default:'#' }}" class="block bg-white rounded border p-3 hover:bg-gray-50">
+    <div class="flex justify-between">
+        <span>{{ match.opponent }}</span>
+        <span>{{ match.date }}</span>
+    </div>
+    <div class="text-sm text-gray-600">
+        <span>{{ match.result }}</span>
+        <span class="ml-2">{{ match.venue }}</span>
+    </div>
+</a>
+{% endfor %}
+{% if next_page %}
+<div hx-get="{% url 'admin:team-info-results' team_id %}?page={{ next_page }}" hx-trigger="revealed" hx-swap="afterend"></div>
+{% endif %}

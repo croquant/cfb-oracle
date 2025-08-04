@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -29,26 +30,75 @@ def team_search(request):
 
 
 def team_detail(request, pk: int):
-    team = get_object_or_404(Team.objects.prefetch_related("logos", "location"), pk=pk)
-    logos = list(team.logos.values_list("url", flat=True))
-    matches_qs = (
-        Match.objects.filter(Q(home_team=team) | Q(away_team=team))
-        .select_related("home_team", "away_team", "venue")
-        [:5]
+    team = get_object_or_404(
+        Team.objects.prefetch_related("logos", "location"), pk=pk
     )
+    logos = list(team.logos.values_list("url", flat=True))
+
+    upcoming_qs = (
+        Match.objects.filter(
+            Q(home_team=team) | Q(away_team=team), completed=False
+        )
+        .select_related("home_team", "away_team", "venue")
+        .order_by("start_date")[:5]
+    )
+    upcoming_matches = []
+    for match in upcoming_qs:
+        if match.home_team_id == team.id:
+            opponent = match.away_team.school
+        else:
+            opponent = match.home_team.school
+        try:
+            url = reverse("admin:core_match_change", args=[match.pk])
+        except NoReverseMatch:
+            url = ""
+        upcoming_matches.append(
+            {
+                "id": match.pk,
+                "opponent": opponent,
+                "date": match.start_date.strftime("%Y-%m-%d"),
+                "venue": match.venue.name if match.venue else "",
+                "url": url,
+            }
+        )
+
+    data = {
+        "id": team.pk,
+        "school": team.school,
+        "mascot": team.mascot or "",
+        "abbreviation": team.abbreviation or "",
+        "classification": team.get_classification_display()
+        if team.classification
+        else "",
+        "color": team.color,
+        "alternate_color": team.alternate_color,
+        "twitter": team.twitter or "",
+        "location": team.location.name if team.location else "",
+        "logos": logos,
+        "upcoming_matches": upcoming_matches,
+    }
+    return JsonResponse(data)
+
+
+def team_completed_matches(request, pk: int):
+    team = get_object_or_404(Team, pk=pk)
+    page = int(request.GET.get("page", 1))
+    matches_qs = Match.objects.filter(
+        Q(home_team=team) | Q(away_team=team), completed=True
+    ).select_related("home_team", "away_team", "venue")
+    paginator = Paginator(matches_qs, 5)
+    page_obj = paginator.get_page(page)
+
     matches = []
-    for match in matches_qs:
+    for match in page_obj.object_list:
         if match.home_team_id == team.id:
             opponent = match.away_team.school
             team_score, opp_score = match.home_score, match.away_score
         else:
             opponent = match.home_team.school
             team_score, opp_score = match.away_score, match.home_score
-        if (
-            match.completed
-            and team_score is not None
-            and opp_score is not None
-        ):
+
+        if team_score is not None and opp_score is not None:
             if team_score > opp_score:
                 result = "W"
             elif team_score < opp_score:
@@ -57,10 +107,12 @@ def team_detail(request, pk: int):
                 result = "T"
         else:
             result = ""
+
         try:
             url = reverse("admin:core_match_change", args=[match.pk])
         except NoReverseMatch:
             url = ""
+
         matches.append(
             {
                 "id": match.pk,
@@ -71,20 +123,13 @@ def team_detail(request, pk: int):
                 "url": url,
             }
         )
-    data = {
-        "id": team.pk,
-        "school": team.school,
-        "mascot": team.mascot or "",
-        "abbreviation": team.abbreviation or "",
-        "classification": team.get_classification_display() if team.classification else "",
-        "color": team.color,
-        "alternate_color": team.alternate_color,
-        "twitter": team.twitter or "",
-        "location": team.location.name if team.location else "",
-        "logos": logos,
+
+    context = {
         "matches": matches,
+        "team_id": team.id,
+        "next_page": page_obj.next_page_number() if page_obj.has_next() else None,
     }
-    return JsonResponse(data)
+    return render(request, "admin/team_completed_matches.html", context)
 
 
 def _get_admin_urls(urls):
@@ -100,6 +145,11 @@ def _get_admin_urls(urls):
                 "team-info/<int:pk>/",
                 admin.site.admin_view(team_detail),
                 name="team-info-detail",
+            ),
+            path(
+                "team-info/<int:pk>/results/",
+                admin.site.admin_view(team_completed_matches),
+                name="team-info-results",
             ),
         ]
         return custom_urls + urls()
