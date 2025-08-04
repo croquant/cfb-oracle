@@ -194,6 +194,11 @@ UNFOLD = {
                         "icon": "stadium",
                         "link": lambda request: reverse("admin:core_venue_changelist"),
                     },
+                    {
+                        "title": "Matches",
+                        "icon": "scoreboard",
+                        "link": lambda request: reverse("admin:core_match_changelist"),
+                    },
                 ],
             },
             {
