@@ -4,6 +4,7 @@ import cfbd
 from cfbd.rest import ApiException
 from django.core.management.base import BaseCommand, CommandError
 from dotenv import load_dotenv
+import time
 
 from core.models.conference import Conference
 from core.models.team import Team, TeamAlternativeName, TeamLogo
@@ -157,14 +158,34 @@ class Command(BaseCommand):
             venues_api_instance = cfbd.VenuesApi(api_client)
             teams_api_instance = cfbd.TeamsApi(api_client)
             conferences_api_instance = cfbd.ConferencesApi(api_client)
+            total_start = time.perf_counter()
 
             try:
+                step_start = time.perf_counter()
                 self.import_venues(venues_api_instance)
+                self.stdout.write(
+                    f"Venues import completed in {time.perf_counter() - step_start:.2f} seconds"
+                )
+
+                step_start = time.perf_counter()
                 self.import_conferences(conferences_api_instance)
+                self.stdout.write(
+                    f"Conferences import completed in {time.perf_counter() - step_start:.2f} seconds"
+                )
+
+                step_start = time.perf_counter()
                 self.import_teams(
                     teams_api_instance,
                     conference=options.get("conference"),
                     year=options.get("year"),
                 )
+                self.stdout.write(
+                    f"Teams import completed in {time.perf_counter() - step_start:.2f} seconds"
+                )
             except ApiException as e:
                 self.stderr.write(f"Exception when calling CFBD API: {e}\n")
+            finally:
+                total_elapsed = time.perf_counter() - total_start
+                self.stdout.write(
+                    f"Total import completed in {total_elapsed:.2f} seconds"
+                )
