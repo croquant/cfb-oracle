@@ -1,11 +1,11 @@
 import os
+import time
 from datetime import date
 
 import cfbd
 from cfbd.rest import ApiException
 from django.core.management.base import BaseCommand, CommandError
 from dotenv import load_dotenv
-import time
 
 from core.models.conference import Conference
 from core.models.match import Match
@@ -14,7 +14,7 @@ from core.models.venue import Venue
 
 
 class Command(BaseCommand):
-    help = "Imports teams from CFBD API"
+    help = "Imports data from CFBD API"
 
     def add_arguments(self, parser):
         parser.add_argument(
