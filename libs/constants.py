@@ -5,3 +5,6 @@ DEFAULT_VOLATILITY = 0.11
 GLICKO2_SCALER = 173.7178
 TAU = 0.9
 CONVERGENCE_TOLERANCE = 0.000001
+
+# Maximum score margin considered when weighting Glicko updates
+MARGIN_WEIGHT_CAP = 21
