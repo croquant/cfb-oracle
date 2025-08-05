@@ -24,6 +24,7 @@ class Command(BaseCommand):
         GlickoRating.objects.all().delete()
 
         self.stdout.write("Calculating Glicko ratings...")
+
         players: dict[int, Player] = {}
 
         def get_player(team_id: int, division):
@@ -38,6 +39,7 @@ class Command(BaseCommand):
         seasons = (
             Match.objects.order_by("season").values_list("season", flat=True).distinct()
         )
+
         for season in seasons:
             matches_qs = Match.objects.filter(season=season, completed=True)
             if matches_qs.count() == 0:
@@ -79,19 +81,11 @@ class Command(BaseCommand):
                 home_division = None
                 if match.home_classification:
                     home_division = DivisionClassification(match.home_classification)
-                elif match.home_team.classification:
-                    home_division = DivisionClassification(
-                        match.home_team.classification
-                    )
                 home_team = get_player(match.home_team_id, home_division)
 
                 away_division = None
                 if match.away_classification:
                     away_division = DivisionClassification(match.away_classification)
-                elif match.away_team.classification:
-                    away_division = DivisionClassification(
-                        match.away_team.classification
-                    )
                 away_team = get_player(match.away_team_id, away_division)
 
                 home_team_outcome = 0.5

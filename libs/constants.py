@@ -17,14 +17,12 @@ DIVISION_BASE_RATINGS = {
 }
 
 DIVISION_BASE_RDS = {
-    DivisionClassification.FBS: DEFAULT_RD,
-    DivisionClassification.FCS: DEFAULT_RD,
-    DivisionClassification.II: DEFAULT_RD,
-    DivisionClassification.III: DEFAULT_RD,
+    DivisionClassification.FBS: DEFAULT_RD
+    * (DIVISION_BASE_RATINGS[DivisionClassification.FBS] / DEFAULT_RATING),
+    DivisionClassification.FCS: DEFAULT_RD
+    * (DIVISION_BASE_RATINGS[DivisionClassification.FCS] / DEFAULT_RATING),
+    DivisionClassification.II: DEFAULT_RD
+    * (DIVISION_BASE_RATINGS[DivisionClassification.II] / DEFAULT_RATING),
+    DivisionClassification.III: DEFAULT_RD
+    * (DIVISION_BASE_RATINGS[DivisionClassification.III] / DEFAULT_RATING),
 }
-
-# Maximum score margin considered when weighting Glicko updates
-MARGIN_WEIGHT_CAP = 21
-
-# Home-field advantage applied to Glicko ratings
-HOME_FIELD_BONUS = 55
