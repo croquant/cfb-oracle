@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand
 from core.models.glicko import GlickoRating
 from core.models.match import Match
 from core.models.team import Team
+from libs.constants import MARGIN_WEIGHT_CAP
 from libs.glicko2 import Player
 
 
@@ -30,7 +31,7 @@ class Command(BaseCommand):
                 continue
             self.stdout.write(f"Processing season {season}...")
 
-            results: dict[int, list[tuple[float, float, int]]] = {}
+            results: dict[int, list[tuple[float, float, float, float]]] = {}
             for match in matches:
                 home_team = players.setdefault(match.home_team_id, Player())
                 away_team = players.setdefault(match.away_team_id, Player())
@@ -42,11 +43,14 @@ class Command(BaseCommand):
                     home_team_outcome = 0
                 away_team_outcome = 1 - home_team_outcome
 
+                margin = abs(match.home_score - match.away_score)
+                margin_factor = min(margin, MARGIN_WEIGHT_CAP) / MARGIN_WEIGHT_CAP
+
                 results.setdefault(match.home_team_id, []).append(
-                    (away_team.rating, away_team.rd, home_team_outcome)
+                    (away_team.rating, away_team.rd, margin_factor, home_team_outcome)
                 )
                 results.setdefault(match.away_team_id, []).append(
-                    (home_team.rating, home_team.rd, away_team_outcome)
+                    (home_team.rating, home_team.rd, margin_factor, away_team_outcome)
                 )
 
             ratings = []
@@ -58,9 +62,9 @@ class Command(BaseCommand):
 
                 recs = results.get(player_id, [])
                 if recs:
-                    r_list = [r for r, _, _ in recs]
-                    rd_list = [rd for _, rd, _ in recs]
-                    o_list = [o for _, _, o in recs]
+                    r_list = [r for r, _, _, _ in recs]
+                    rd_list = [rd for _, rd, _, _ in recs]
+                    o_list = [0.5 + (o - 0.5) * m for _, _, m, o in recs]
                     player.update_player(r_list, rd_list, o_list)
                     team_status_updates.append((player_id, True))
                 else:
