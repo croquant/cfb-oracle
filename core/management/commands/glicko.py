@@ -1,9 +1,10 @@
 from django.core.management.base import BaseCommand
+from django.db.models import F
 
 from core.models.glicko import GlickoRating
 from core.models.match import Match
 from core.models.team import Team
-from libs.constants import MARGIN_WEIGHT_CAP
+from libs.constants import HOME_FIELD_BONUS, MARGIN_WEIGHT_CAP
 from libs.glicko2 import Player
 
 
@@ -17,18 +18,20 @@ class Command(BaseCommand):
 
         self.stdout.write("Calculating Glicko ratings...")
         players: dict[int, Player] = {}
+        bonus_by_season: dict[int, float] = {}
         seasons = (
             Match.objects.order_by("season").values_list("season", flat=True).distinct()
         )
         for season in seasons:
-            matches = (
-                Match.objects.filter(season=season)
-                .filter(completed=True)
-                .order_by("start_date")
-            )
-            if not matches.exists():
+            matches_qs = Match.objects.filter(season=season, completed=True)
+            total_games = matches_qs.count()
+            if total_games == 0:
                 self.stdout.write(f"No matches found for season {season}. Skipping...")
                 continue
+            home_wins = matches_qs.filter(home_score__gt=F("away_score")).count()
+            bonus_by_season[season] = HOME_FIELD_BONUS * (home_wins / total_games)
+            home_field_bonus = bonus_by_season[season]
+            matches = matches_qs.order_by("start_date")
             self.stdout.write(f"Processing season {season}...")
 
             results: dict[int, list[tuple[float, float, float, float]]] = {}
@@ -46,11 +49,14 @@ class Command(BaseCommand):
                 margin = abs(match.home_score - match.away_score)
                 margin_factor = min(margin, MARGIN_WEIGHT_CAP) / MARGIN_WEIGHT_CAP
 
+                home_rating = home_team.rating + home_field_bonus
+                away_rating = away_team.rating - home_field_bonus
+
                 results.setdefault(match.home_team_id, []).append(
-                    (away_team.rating, away_team.rd, margin_factor, home_team_outcome)
+                    (away_rating, away_team.rd, margin_factor, home_team_outcome)
                 )
                 results.setdefault(match.away_team_id, []).append(
-                    (home_team.rating, home_team.rd, margin_factor, away_team_outcome)
+                    (home_rating, home_team.rd, margin_factor, away_team_outcome)
                 )
 
             ratings = []
