@@ -2,9 +2,16 @@ from django.core.management.base import BaseCommand
 from django.db.models import Avg, F
 from django.db.models.functions import Abs
 
+from core.models.enums import DivisionClassification
 from core.models.glicko import GlickoRating
 from core.models.match import Match
 from core.models.team import Team
+from libs.constants import (
+    DEFAULT_RATING,
+    DEFAULT_RD,
+    DIVISION_BASE_RATINGS,
+    DIVISION_BASE_RDS,
+)
 from libs.glicko2 import Player
 
 
@@ -18,6 +25,16 @@ class Command(BaseCommand):
 
         self.stdout.write("Calculating Glicko ratings...")
         players: dict[int, Player] = {}
+
+        def get_player(team_id: int, division):
+            player = players.get(team_id)
+            if player is None:
+                rating = DIVISION_BASE_RATINGS.get(division, DEFAULT_RATING)
+                rd = DIVISION_BASE_RDS.get(division, DEFAULT_RD)
+                player = Player(rating=rating, rd=rd)
+                players[team_id] = player
+            return player
+
         seasons = (
             Match.objects.order_by("season").values_list("season", flat=True).distinct()
         )
@@ -59,8 +76,23 @@ class Command(BaseCommand):
 
             results: dict[int, list[tuple[float, float, float, float]]] = {}
             for match in matches:
-                home_team = players.setdefault(match.home_team_id, Player())
-                away_team = players.setdefault(match.away_team_id, Player())
+                home_division = None
+                if match.home_classification:
+                    home_division = DivisionClassification(match.home_classification)
+                elif match.home_team.classification:
+                    home_division = DivisionClassification(
+                        match.home_team.classification
+                    )
+                home_team = get_player(match.home_team_id, home_division)
+
+                away_division = None
+                if match.away_classification:
+                    away_division = DivisionClassification(match.away_classification)
+                elif match.away_team.classification:
+                    away_division = DivisionClassification(
+                        match.away_team.classification
+                    )
+                away_team = get_player(match.away_team_id, away_division)
 
                 home_team_outcome = 0.5
                 if match.home_score > match.away_score:
