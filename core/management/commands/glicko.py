@@ -18,21 +18,34 @@ class Command(BaseCommand):
 
         self.stdout.write("Calculating Glicko ratings...")
         players: dict[int, Player] = {}
-        bonus_by_season: dict[int, float] = {}
         seasons = (
             Match.objects.order_by("season").values_list("season", flat=True).distinct()
         )
         for season in seasons:
             matches_qs = Match.objects.filter(season=season, completed=True)
-            total_games = matches_qs.count()
-            if total_games == 0:
+            if matches_qs.count() == 0:
                 self.stdout.write(f"No matches found for season {season}. Skipping...")
                 continue
-            home_wins = matches_qs.filter(home_score__gt=F("away_score")).count()
-            bonus_by_season[season] = HOME_FIELD_BONUS * (home_wins / total_games)
-            home_field_bonus = bonus_by_season[season]
+
+            # Calculate home field advantage bonus
+            prev_season = season - 1
+            prev_matches_qs = Match.objects.filter(season=prev_season, completed=True)
+            non_neutral_matches = prev_matches_qs.filter(neutral_site=False)
+            total_non_neutral_matches = non_neutral_matches.count()
+            if total_non_neutral_matches > 0:
+                home_wins = non_neutral_matches.filter(
+                    home_score__gt=F("away_score")
+                ).count()
+                home_field_bonus = HOME_FIELD_BONUS * (
+                    home_wins / total_non_neutral_matches
+                )
+            else:
+                home_field_bonus = HOME_FIELD_BONUS
+
             matches = matches_qs.order_by("start_date")
-            self.stdout.write(f"Processing season {season}...")
+            self.stdout.write(
+                f"Processing season {season}... {matches.count()} matches found."
+            )
 
             results: dict[int, list[tuple[float, float, float, float]]] = {}
             for match in matches:
