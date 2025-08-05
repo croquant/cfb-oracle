@@ -5,7 +5,6 @@ from django.db.models.functions import Abs
 from core.models.glicko import GlickoRating
 from core.models.match import Match
 from core.models.team import Team
-from libs.constants import HOME_FIELD_BONUS, MARGIN_WEIGHT_CAP
 from libs.glicko2 import Player
 
 
@@ -30,6 +29,9 @@ class Command(BaseCommand):
 
             # Calculate home field advantage bonus
             prev_season = season - 1
+            prev_season_avg_rating = GlickoRating.objects.filter(
+                season=prev_season
+            ).aggregate(avg_rating=Avg("rating"))["avg_rating"]
             prev_matches_qs = Match.objects.filter(season=prev_season, completed=True)
             non_neutral_matches = prev_matches_qs.filter(neutral_site=False)
             total_non_neutral_matches = non_neutral_matches.count()
@@ -37,19 +39,18 @@ class Command(BaseCommand):
                 home_wins = non_neutral_matches.filter(
                     home_score__gt=F("away_score")
                 ).count()
-                home_field_bonus = HOME_FIELD_BONUS * (
-                    home_wins / total_non_neutral_matches
-                )
+                home_win_percent = home_wins / total_non_neutral_matches
+                home_field_bonus = (home_win_percent - 0.5) * prev_season_avg_rating
             else:
-                home_field_bonus = HOME_FIELD_BONUS
+                home_field_bonus = 0
 
-            prev_margin = prev_matches_qs.aggregate(
+            # Calculate margin weight cap
+            prev_season_avg_margin = prev_matches_qs.aggregate(
                 avg_margin=Avg(Abs(F("home_score") - F("away_score")))
             )["avg_margin"]
-            if prev_margin:
-                margin_weight_cap = prev_margin
-            else:
-                margin_weight_cap = MARGIN_WEIGHT_CAP
+            margin_weight_cap = (
+                prev_season_avg_margin * 1.5 if prev_season_avg_margin else 1.5
+            )
 
             matches = matches_qs.order_by("start_date")
             self.stdout.write(
@@ -71,8 +72,12 @@ class Command(BaseCommand):
                 margin = abs(match.home_score - match.away_score)
                 margin_factor = min(margin, margin_weight_cap) / margin_weight_cap
 
-                home_rating = home_team.rating + home_field_bonus
-                away_rating = away_team.rating - home_field_bonus
+                if match.neutral_site:
+                    home_rating = home_team.rating
+                    away_rating = away_team.rating
+                else:
+                    home_rating = home_team.rating + home_field_bonus / 2
+                    away_rating = away_team.rating - home_field_bonus / 2
 
                 results.setdefault(match.home_team_id, []).append(
                     (away_rating, away_team.rd, margin_factor, home_team_outcome)
