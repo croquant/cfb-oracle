@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
-from django.db.models import F
+from django.db.models import Avg, F
+from django.db.models.functions import Abs
 
 from core.models.glicko import GlickoRating
 from core.models.match import Match
@@ -42,6 +43,14 @@ class Command(BaseCommand):
             else:
                 home_field_bonus = HOME_FIELD_BONUS
 
+            prev_margin = prev_matches_qs.aggregate(
+                avg_margin=Avg(Abs(F("home_score") - F("away_score")))
+            )["avg_margin"]
+            if prev_margin:
+                margin_weight_cap = prev_margin
+            else:
+                margin_weight_cap = MARGIN_WEIGHT_CAP
+
             matches = matches_qs.order_by("start_date")
             self.stdout.write(
                 f"Processing season {season}... {matches.count()} matches found."
@@ -60,7 +69,7 @@ class Command(BaseCommand):
                 away_team_outcome = 1 - home_team_outcome
 
                 margin = abs(match.home_score - match.away_score)
-                margin_factor = min(margin, MARGIN_WEIGHT_CAP) / MARGIN_WEIGHT_CAP
+                margin_factor = min(margin, margin_weight_cap) / margin_weight_cap
 
                 home_rating = home_team.rating + home_field_bonus
                 away_rating = away_team.rating - home_field_bonus

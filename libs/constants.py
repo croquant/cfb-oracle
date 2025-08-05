@@ -6,7 +6,8 @@ GLICKO2_SCALER = 173.7178
 TAU = 0.9
 CONVERGENCE_TOLERANCE = 0.000001
 
-# Maximum score margin considered when weighting Glicko updates
+# Default maximum score margin considered when weighting Glicko updates
+# (used when previous season data is unavailable)
 MARGIN_WEIGHT_CAP = 21
 
 # Home-field advantage applied to Glicko ratings
