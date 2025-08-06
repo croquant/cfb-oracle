@@ -1,5 +1,6 @@
 import json
 from collections import defaultdict
+from django.core.cache import cache
 from django.shortcuts import render
 
 from core.models.glicko import GlickoRating
@@ -7,15 +8,19 @@ from core.models.glicko import GlickoRating
 
 def index(request):
     """Ranking view with optional season and week filters."""
-    # Build mapping of seasons to available weeks
-    season_weeks = (
-        GlickoRating.objects.order_by("season", "week")
-        .values("season", "week")
-        .distinct()
-    )
-    weeks = defaultdict(list)
-    for row in season_weeks:
-        weeks[row["season"]].append(row["week"])
+    # Build mapping of seasons to available weeks (cached)
+    weeks = cache.get("season_weeks")
+    if weeks is None:
+        season_weeks = (
+            GlickoRating.objects.order_by("season", "week")
+            .values("season", "week")
+            .distinct()
+        )
+        weeks_dict = defaultdict(list)
+        for row in season_weeks:
+            weeks_dict[row["season"]].append(row["week"])
+        weeks = dict(weeks_dict)
+        cache.set("season_weeks", weeks, 3600)
 
     seasons = sorted(weeks.keys())
     latest_season = seasons[-1] if seasons else None
@@ -50,5 +55,5 @@ def index(request):
         "weeks_json": json.dumps(weeks),
     }
 
-    template = "partials/ranking_table.html" if request.headers.get("HX-Request") else "index.html"
+    template = "cotton/ranking_table.html" if request.headers.get("HX-Request") else "index.html"
     return render(request, template, context)
