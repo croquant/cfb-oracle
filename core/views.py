@@ -1,5 +1,6 @@
 import json
 from collections import defaultdict
+
 from django.core.cache import cache
 from django.shortcuts import render
 
@@ -55,5 +56,9 @@ def index(request):
         "weeks_json": json.dumps(weeks),
     }
 
-    template = "cotton/ranking_table.html" if request.headers.get("HX-Request") else "index.html"
+    template = (
+        "cotton/ranking_table.html"
+        if request.headers.get("HX-Request")
+        else "index.html"
+    )
     return render(request, template, context)

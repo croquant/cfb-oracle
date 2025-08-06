@@ -1,25 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
-<c-card title="Rankings">
+    <c-card title="Rankings">
     <div x-data="rankingFilter()" class="d-flex flex-column">
         <div class="row mb-3">
             <div class="col">
                 <label for="season-select" class="form-label">Season</label>
                 <select id="season-select"
                         name="season"
-                        class="form-control"
+                        class="form-select"
                         x-model="season"
                         @change="week = weeks[season][weeks[season].length - 1]; htmx.trigger('#ranking-table','refresh')">
-                    {% for s in seasons %}
-                        <option value="{{ s }}">{{ s }}</option>
-                    {% endfor %}
+                    {% for s in seasons %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
                 </select>
             </div>
             <div class="col">
                 <label for="week-select" class="form-label">Week</label>
                 <select id="week-select"
                         name="week"
-                        class="form-control"
+                        class="form-select"
                         x-model="week"
                         @change="htmx.trigger('#ranking-table','refresh')">
                     <template x-for="w in weeks[season]" :key="w">
@@ -36,8 +34,8 @@
             <c-ranking-table></c-ranking-table>
         </div>
     </div>
-</c-card>
-<script>
+    </c-card>
+    <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('rankingFilter', () => ({
             season: {{ season }},
@@ -45,5 +43,5 @@
             weeks: {{ weeks_json|safe }}
         }))
     })
-</script>
+    </script>
 {% endblock content %}

@@ -1,9 +1,5 @@
-<div class="bg-white shadow rounded border p-4">
-    {% if title %}
-        <h2>{{ title }}</h2>
-    {% endif %}
+<div class="bg-white shadow border p-4">
+    {% if title %}<h2>{{ title }}</h2>{% endif %}
     {{ slot }}
-    {% if url %}
-        <a href="{{ url }}" class="btn btn-primary">Read more</a>
-    {% endif %}
+    {% if url %}<a href="{{ url }}" class="btn btn-primary">Read more</a>{% endif %}
 </div>
