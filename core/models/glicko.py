@@ -6,15 +6,16 @@ from .team import Team
 
 
 class GlickoRating(models.Model):
-    """Glicko rating for a team in a specific season."""
+    """Glicko rating for a team in a specific season and week."""
 
-    pk = models.CompositePrimaryKey("team_id", "season")
+    pk = models.CompositePrimaryKey("team_id", "season", "week")
     team = models.ForeignKey(
         Team,
         on_delete=models.CASCADE,
         related_name="rating_history",
     )
     season = models.PositiveIntegerField()
+    week = models.PositiveIntegerField()
     previous_rating = models.FloatField(default=DEFAULT_RATING)
     previous_rd = models.FloatField(default=DEFAULT_RD)
     previous_vol = models.FloatField(default=DEFAULT_VOLATILITY)
@@ -28,13 +29,13 @@ class GlickoRating(models.Model):
     )
 
     class Meta:
-        ordering = ["season", "team_id"]
+        ordering = ["season", "week", "team_id"]
         verbose_name = "glicko rating"
         verbose_name_plural = "glicko ratings"
         constraints = [
             models.UniqueConstraint(
-                fields=["team", "season"],
-                name="unique_team_glicko_rating_per_season",
+                fields=["team", "season", "week"],
+                name="unique_team_glicko_rating_per_week",
             )
         ]
-        indexes = [models.Index(fields=["team", "season"])]
+        indexes = [models.Index(fields=["team", "season", "week"])]
