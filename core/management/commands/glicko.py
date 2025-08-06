@@ -71,89 +71,98 @@ class Command(BaseCommand):
                 prev_season_avg_margin * 1.5 if prev_season_avg_margin else 1.5
             )
 
-            matches = matches_qs.order_by("start_date")
+            weeks = list(
+                matches_qs.order_by("week").values_list("week", flat=True).distinct()
+            )
             self.stdout.write(
-                f"Processing season {season}... {matches.count()} matches found."
+                f"Processing season {season}... {matches_qs.count()} matches found across {len(weeks)} weeks."
             )
 
-            results: dict[int, list[tuple[float, float, float, float]]] = {}
-            for match in matches:
-                home_division = None
-                if match.home_classification:
-                    home_division = DivisionClassification(match.home_classification)
-                home_team = get_player(match.home_team_id, home_division)
-
-                away_division = None
-                if match.away_classification:
-                    away_division = DivisionClassification(match.away_classification)
-                away_team = get_player(match.away_team_id, away_division)
-
-                home_team_outcome = 0.5
-                if match.home_score > match.away_score:
-                    home_team_outcome = 1
-                elif match.home_score < match.away_score:
-                    home_team_outcome = 0
-                away_team_outcome = 1 - home_team_outcome
-
-                margin = abs(match.home_score - match.away_score)
-                margin_factor = min(margin, margin_weight_cap) / margin_weight_cap
-
-                if match.neutral_site:
-                    home_rating = home_team.rating
-                    away_rating = away_team.rating
-                else:
-                    home_rating = home_team.rating + home_field_bonus / 2
-                    away_rating = away_team.rating - home_field_bonus / 2
-
-                results.setdefault(match.home_team_id, []).append(
-                    (away_rating, away_team.rd, margin_factor, home_team_outcome)
-                )
-                results.setdefault(match.away_team_id, []).append(
-                    (home_rating, home_team.rd, margin_factor, away_team_outcome)
+            season_active_teams: set[int] = set()
+            for week in weeks:
+                week_matches = matches_qs.filter(week=week).order_by("start_date")
+                self.stdout.write(
+                    f"  Processing week {week}... {week_matches.count()} matches found."
                 )
 
-            ratings = []
-            team_status_updates = []
-            for player_id, player in players.items():
-                before_rating = player.rating
-                before_rd = player.rd
-                before_vol = player.vol
+                results: dict[int, list[tuple[float, float, float, float]]] = {}
+                for match in week_matches:
+                    home_division = None
+                    if match.home_classification:
+                        home_division = DivisionClassification(match.home_classification)
+                    home_team = get_player(match.home_team_id, home_division)
 
-                recs = results.get(player_id, [])
-                if recs:
-                    r_list = [r for r, _, _, _ in recs]
-                    rd_list = [rd for _, rd, _, _ in recs]
-                    o_list = [0.5 + (o - 0.5) * m for _, _, m, o in recs]
-                    player.update_player(r_list, rd_list, o_list)
-                    team_status_updates.append((player_id, True))
-                else:
-                    player.did_not_compete()
-                    team_status_updates.append((player_id, False))
+                    away_division = None
+                    if match.away_classification:
+                        away_division = DivisionClassification(match.away_classification)
+                    away_team = get_player(match.away_team_id, away_division)
 
-                ratings.append(
-                    GlickoRating(
-                        team_id=player_id,
-                        season=season,
-                        previous_rating=before_rating,
-                        previous_rd=before_rd,
-                        previous_vol=before_vol,
-                        rating=player.rating,
-                        rd=player.rd,
-                        vol=player.vol,
+                    season_active_teams.update([match.home_team_id, match.away_team_id])
+
+                    home_team_outcome = 0.5
+                    if match.home_score > match.away_score:
+                        home_team_outcome = 1
+                    elif match.home_score < match.away_score:
+                        home_team_outcome = 0
+                    away_team_outcome = 1 - home_team_outcome
+
+                    margin = abs(match.home_score - match.away_score)
+                    margin_factor = min(margin, margin_weight_cap) / margin_weight_cap
+
+                    if match.neutral_site:
+                        home_rating = home_team.rating
+                        away_rating = away_team.rating
+                    else:
+                        home_rating = home_team.rating + home_field_bonus / 2
+                        away_rating = away_team.rating - home_field_bonus / 2
+
+                    results.setdefault(match.home_team_id, []).append(
+                        (away_rating, away_team.rd, margin_factor, home_team_outcome)
                     )
-                )
+                    results.setdefault(match.away_team_id, []).append(
+                        (home_rating, home_team.rd, margin_factor, away_team_outcome)
+                    )
 
-            # Bulk update team active status
-            if team_status_updates:
+                ratings = []
+                for player_id, player in players.items():
+                    before_rating = player.rating
+                    before_rd = player.rd
+                    before_vol = player.vol
+
+                    recs = results.get(player_id, [])
+                    if recs:
+                        r_list = [r for r, _, _, _ in recs]
+                        rd_list = [rd for _, rd, _, _ in recs]
+                        o_list = [0.5 + (o - 0.5) * m for _, _, m, o in recs]
+                        player.update_player(r_list, rd_list, o_list)
+                    else:
+                        player.did_not_compete()
+
+                    ratings.append(
+                        GlickoRating(
+                            team_id=player_id,
+                            season=season,
+                            week=week,
+                            previous_rating=before_rating,
+                            previous_rd=before_rd,
+                            previous_vol=before_vol,
+                            rating=player.rating,
+                            rd=player.rd,
+                            vol=player.vol,
+                        )
+                    )
+
+                if ratings:
+                    GlickoRating.objects.bulk_create(
+                        ratings, batch_size=500, ignore_conflicts=True
+                    )
+
+            # Bulk update team active status after season processed
+            if players:
                 Team.objects.bulk_update(
                     [
-                        Team(id=team_id, active=active)
-                        for team_id, active in team_status_updates
+                        Team(id=team_id, active=(team_id in season_active_teams))
+                        for team_id in players.keys()
                     ],
                     fields=["active"],
-                )
-
-            if ratings:
-                GlickoRating.objects.bulk_create(
-                    ratings, batch_size=500, ignore_conflicts=True
                 )
