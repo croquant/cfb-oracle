@@ -1,3 +1,5 @@
+import math
+
 from django.core.management.base import BaseCommand
 from django.db.models import Avg, F
 from django.db.models.functions import Abs
@@ -16,7 +18,11 @@ from libs.glicko2 import Player
 
 
 class Command(BaseCommand):
-    help = "Calculate Glicko ratings for each team in each season"
+    """
+    Calculate Glicko ratings for each team in each week.
+    """
+
+    help = "Calculate Glicko ratings for each team in each week"
 
     def handle(self, *args, **options):
         # Clear existing ratings
@@ -64,6 +70,10 @@ class Command(BaseCommand):
                 home_field_bonus = 0
 
             # Calculate margin weight cap
+            # The margin of victory is scaled logarithmically:
+            # ``log(margin + 1) / log(margin_weight_cap + 1)``.
+            # This approach limits the impact of blowout games by applying diminishing returns
+            # for larger margins, while still rewarding clear victories.
             prev_season_avg_margin = prev_matches_qs.aggregate(
                 avg_margin=Avg(Abs(F("home_score") - F("away_score")))
             )["avg_margin"]
@@ -89,12 +99,16 @@ class Command(BaseCommand):
                 for match in week_matches:
                     home_division = None
                     if match.home_classification:
-                        home_division = DivisionClassification(match.home_classification)
+                        home_division = DivisionClassification(
+                            match.home_classification
+                        )
                     home_team = get_player(match.home_team_id, home_division)
 
                     away_division = None
                     if match.away_classification:
-                        away_division = DivisionClassification(match.away_classification)
+                        away_division = DivisionClassification(
+                            match.away_classification
+                        )
                     away_team = get_player(match.away_team_id, away_division)
 
                     season_active_teams.update([match.home_team_id, match.away_team_id])
@@ -107,7 +121,7 @@ class Command(BaseCommand):
                     away_team_outcome = 1 - home_team_outcome
 
                     margin = abs(match.home_score - match.away_score)
-                    margin_factor = min(margin, margin_weight_cap) / margin_weight_cap
+                    log_margin = math.log(margin + 1)
 
                     if match.neutral_site:
                         home_rating = home_team.rating
@@ -117,10 +131,10 @@ class Command(BaseCommand):
                         away_rating = away_team.rating - home_field_bonus / 2
 
                     results.setdefault(match.home_team_id, []).append(
-                        (away_rating, away_team.rd, margin_factor, home_team_outcome)
+                        (away_rating, away_team.rd, log_margin, home_team_outcome)
                     )
                     results.setdefault(match.away_team_id, []).append(
-                        (home_rating, home_team.rd, margin_factor, away_team_outcome)
+                        (home_rating, home_team.rd, log_margin, away_team_outcome)
                     )
 
                 ratings = []
@@ -133,7 +147,11 @@ class Command(BaseCommand):
                     if recs:
                         r_list = [r for r, _, _, _ in recs]
                         rd_list = [rd for _, rd, _, _ in recs]
-                        o_list = [0.5 + (o - 0.5) * m for _, _, m, o in recs]
+                        max_log_margin = math.log(margin_weight_cap + 1)
+                        o_list = [
+                            0.5 + (o - 0.5) * min(lm, max_log_margin) / max_log_margin
+                            for _, _, lm, o in recs
+                        ]
                         player.update_player(r_list, rd_list, o_list)
                     else:
                         player.did_not_compete()
