@@ -1,0 +1,27 @@
+<table class="table table-sm border">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Team</th>
+            <th>Rating</th>
+            <th>Diff</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for rating in ratings %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                    <a href="{{ rating.team.get_absolute_url }}" class="icon-link">
+                        <img src="{{ rating.logo_url }}"
+                             alt="{{ rating.team.school }} logo"
+                             style="height: 1em">
+                        {{ rating.team.school }}
+                    </a>
+                </td>
+                <td>{{ rating.rating | floatformat:0 }}</td>
+                <td>{{ rating.rating_change | floatformat:0 }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
