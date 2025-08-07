@@ -1,8 +1,8 @@
 from django.urls import path
 
-from .views import index
+from .views import ranking_view
 
 urlpatterns = [
-    path("", index, name="index"),
-    path("rankings/<str:classification>/", index, name="rankings"),
+    path("", ranking_view, name="index"),
+    path("rankings/<str:classification>/", ranking_view, name="rankings"),
 ]

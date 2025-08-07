@@ -9,7 +9,7 @@ from core.models.enums import DivisionClassification
 from core.models.glicko import GlickoRating
 
 
-def index(request, classification: str | None = None):
+def ranking_view(request, classification: str | None = None):
     """Ranking view with optional season, week and classification filters."""
     if classification and classification not in DivisionClassification.values:
         raise Http404
@@ -26,7 +26,7 @@ def index(request, classification: str | None = None):
         weeks_dict = defaultdict(list)
         for row in season_weeks:
             weeks_dict[row["season"]].append(row["week"])
-        weeks = dict(weeks_dict)
+        weeks = {season: sorted(wks) for season, wks in weeks_dict.items()}
         cache.set(cache_key, weeks, 3600)
 
     seasons = sorted(weeks.keys())
@@ -34,7 +34,7 @@ def index(request, classification: str | None = None):
     season = request.GET.get("season")
     season = int(season) if season else latest_season
 
-    season_weeks_list = weeks.get(season, [])
+    season_weeks_list = sorted(weeks.get(season, []))
     latest_week = season_weeks_list[-1] if season_weeks_list else None
     week = request.GET.get("week")
     week = int(week) if week else latest_week
