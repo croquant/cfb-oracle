@@ -1,5 +1,3 @@
-import json
-
 from django.core.cache import cache
 from django.http import Http404
 from django.views.generic import ListView
@@ -38,6 +36,8 @@ class RankingListView(ListView):
             )
             seasons.sort()
             cache.set(seasons_key, seasons, 3600)
+        else:
+            print(f"Cache hit for seasons: {seasons_key}")
         latest_season = seasons[-1] if seasons else None
         season = self.request.GET.get("season")
         season = (
@@ -56,12 +56,12 @@ class RankingListView(ListView):
             weeks = list(weeks_qs.order_by().values_list("week", flat=True).distinct())
             weeks.sort()
             cache.set(weeks_key, weeks, 3600)
+        else:
+            print(f"Cache hit for weeks: {weeks_key}")
         latest_week = weeks[-1] if weeks else None
         week = self.request.GET.get("week")
         week = (
-            int(week)
-            if week and week.isdigit() and int(week) in weeks
-            else latest_week
+            int(week) if week and week.isdigit() and int(week) in weeks else latest_week
         )
 
         return season, week, seasons, weeks
@@ -71,7 +71,7 @@ class RankingListView(ListView):
         qs = GlickoRating.objects.all().select_related("team")
 
         if classification:
-            qs = qs.filter(team__classification=classification)
+            qs = qs.filter(classification=classification)
 
         self.season, self.week, self.seasons, self.weeks = self.get_season_and_week(qs)
         # Filter by chosen season and week
@@ -98,24 +98,12 @@ class RankingListView(ListView):
             f"{classification_label} Rankings" if classification_label else "Rankings"
         )
 
-        weeks_map = {}
-        qs = GlickoRating.objects.all().select_related("team")
-        if classification:
-            qs = qs.filter(team__classification=classification)
-        for s in seasons:
-            season_weeks = list(
-                qs.filter(season=s).order_by().values_list("week", flat=True).distinct()
-            )
-            season_weeks.sort()
-            weeks_map[s] = season_weeks
-
         context.update(
             {
                 "seasons": seasons,
                 "season": season,
                 "weeks": weeks,
                 "week": week,
-                "weeks_json": json.dumps(weeks_map),
                 "classification": classification,
                 "classification_label": classification_label,
                 "title": title,

@@ -16,13 +16,14 @@ class GlickoRating(models.Model):
         on_delete=models.CASCADE,
         related_name="rating_history",
     )
-    season = models.PositiveIntegerField()
-    week = models.PositiveIntegerField()
+    season = models.PositiveIntegerField(db_index=True)
+    week = models.PositiveIntegerField(db_index=True)
     classification = models.CharField(
         max_length=20,
         choices=DivisionClassification.choices,
         null=True,
         blank=True,
+        db_index=True,
     )
     conference = models.ForeignKey(
         Conference,
@@ -30,6 +31,7 @@ class GlickoRating(models.Model):
         null=True,
         blank=True,
         related_name="glicko_ratings",
+        db_index=True,
     )
     previous_rating = models.FloatField(default=DEFAULT_RATING)
     previous_rd = models.FloatField(default=DEFAULT_RD)

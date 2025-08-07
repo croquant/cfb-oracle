@@ -1,21 +1,28 @@
 <div id="ranking-table">
-    <form class="row mb-3" hx-get="{{ request.path }}" hx-trigger="change" hx-target="#ranking-table" hx-swap="outerHTML">
+    <form class="row mb-3"
+          hx-get="{{ request.path }}"
+          hx-trigger="change"
+          hx-target="#ranking-table"
+          hx-swap="outerHTML"
+          hx-replace-url="true">
         <div class="col">
-            <select name="season" class="form-control">
+            <label for="season-select" class="form-label">Season</label>
+            <select id="season-select" name="season" class="form-select rounded-0">
                 {% for s in seasons %}
                     <option value="{{ s }}" {% if s == season %}selected{% endif %}>{{ s }}</option>
                 {% endfor %}
             </select>
         </div>
         <div class="col">
-            <select name="week" class="form-control">
+            <label for="week-select" class="form-label">Week</label>
+            <select id="week-select" name="week" class="form-select rounded-0">
                 {% for w in weeks %}
                     <option value="{{ w }}" {% if w == week %}selected{% endif %}>{{ w }}</option>
                 {% endfor %}
             </select>
         </div>
     </form>
-    <table class="table table-sm border">
+    <table class="table table-sm table-hover border">
         <thead>
             <tr>
                 <th>#</th>
