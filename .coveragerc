@@ -1,0 +1,22 @@
+[run]
+branch = True
+data_file = coverage/.coverage
+
+[paths]
+source =
+    core
+    libs
+
+[report]
+omit =
+    */migrations/*
+    */tests/*
+    config/settings.py
+    config/urls.py
+    config/wsgi.py
+    config/asgi.py
+    manage.py
+show_missing = true
+skip_covered = true
+skip_empty = true
+fail_under = 74

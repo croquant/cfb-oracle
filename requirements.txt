@@ -3,6 +3,7 @@ asgiref==3.9.1
 cfbd==5.9.1
 click==8.2.1
 colorama==0.4.6
+coverage==7.10.2
 cssbeautifier==1.15.4
 Django==5.2.4
 django-cotton==2.1.3
