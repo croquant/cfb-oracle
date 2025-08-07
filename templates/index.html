@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-    <c-card title="Rankings">
+    <c-card title="{{ title }}">
     <div x-data="rankingFilter()" class="d-flex flex-column">
         <div class="row mb-3">
             <div class="col">
@@ -27,7 +27,7 @@
             </div>
         </div>
         <div id="ranking-table"
-             hx-get="{% url 'index' %}"
+             hx-get="{{ request.path }}"
              hx-trigger="load, refresh"
              hx-include="#season-select,#week-select"
              hx-push-url="true"

@@ -28,16 +28,16 @@
                        aria-expanded="false">Rankings</a>
                     <ul class="dropdown-menu dropdown-menu-end mt-md-2 rounded-top-0">
                         <li>
-                            <a class="dropdown-item" href="#">FBS</a>
+                            <a class="dropdown-item" href="{% url 'rankings' 'fbs' %}">FBS</a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#">FCS</a>
+                            <a class="dropdown-item" href="{% url 'rankings' 'fcs' %}">FCS</a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#">Div. II</a>
+                            <a class="dropdown-item" href="{% url 'rankings' 'ii' %}">Div. II</a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#">Div. III</a>
+                            <a class="dropdown-item" href="{% url 'rankings' 'iii' %}">Div. III</a>
                         </li>
                     </ul>
                 </li>
