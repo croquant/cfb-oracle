@@ -10,3 +10,4 @@ class ConferenceAdmin(ModelAdmin):
     list_filter = ("classification",)
     search_fields = ("name", "short_name", "abbreviation")
     list_filter_sheet = False
+    prepopulated_fields = {"slug": ("name",)}
