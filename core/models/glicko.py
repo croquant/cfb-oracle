@@ -37,6 +37,7 @@ class GlickoRating(models.Model):
     rating = models.FloatField()
     rd = models.FloatField()
     vol = models.FloatField()
+    active = models.BooleanField(default=False)
     rating_change = models.GeneratedField(
         output_field=models.FloatField(),
         expression=models.F("rating") - models.F("previous_rating"),

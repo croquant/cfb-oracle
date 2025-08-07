@@ -33,12 +33,22 @@ class Command(BaseCommand):
         self.stdout.write("Calculating Glicko ratings...")
 
         players: Dict[int, Player] = {}
-        seasons = (
+        seasons = list(
             Match.objects.order_by("season").values_list("season", flat=True).distinct()
         )
 
+        last_active_teams: set[int] = set()
         for season in seasons:
-            self._process_season(season, players)
+            last_active_teams = self._process_season(season, players)
+
+        if players and seasons:
+            Team.objects.bulk_update(
+                [
+                    Team(id=team_id, active=(team_id in last_active_teams))
+                    for team_id in players.keys()
+                ],
+                fields=["active"],
+            )
 
     # ------------------------------------------------------------------
     # Helpers
@@ -54,12 +64,12 @@ class Command(BaseCommand):
             players[team_id] = player
         return player
 
-    def _process_season(self, season: int, players: Dict[int, Player]) -> None:
+    def _process_season(self, season: int, players: Dict[int, Player]) -> set[int]:
         """Process all matches for a single season."""
         matches_qs = Match.objects.filter(season=season, completed=True)
         if matches_qs.count() == 0:
             self.stdout.write(f"No matches found for season {season}. Skipping...")
-            return
+            return set()
 
         prev_season = season - 1
         prev_matches_qs = Match.objects.filter(season=prev_season, completed=True)
@@ -97,14 +107,7 @@ class Command(BaseCommand):
                 team_meta,
             )
 
-        if players:
-            Team.objects.bulk_update(
-                [
-                    Team(id=team_id, active=(team_id in season_active_teams))
-                    for team_id in players.keys()
-                ],
-                fields=["active"],
-            )
+        return season_active_teams
 
     def _process_week(
         self,
@@ -134,7 +137,13 @@ class Command(BaseCommand):
         team_meta.update(week_meta)
 
         self._update_ratings(
-            season, week, players, results, margin_weight_cap, team_meta
+            season,
+            week,
+            players,
+            results,
+            margin_weight_cap,
+            team_meta,
+            season_active_teams,
         )
 
     def _process_match(
@@ -204,6 +213,7 @@ class Command(BaseCommand):
         results: Dict[int, List[Tuple[float, float, float, float]]],
         margin_weight_cap: float,
         team_meta: Dict[int, Tuple[Optional[str], Optional[int]]],
+        season_active_teams: set[int],
     ) -> None:
         """Update player ratings from match results."""
         ratings = []
@@ -240,6 +250,7 @@ class Command(BaseCommand):
                     rating=player.rating,
                     rd=player.rd,
                     vol=player.vol,
+                    active=player_id in season_active_teams,
                 )
             )
 
