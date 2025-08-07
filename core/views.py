@@ -38,15 +38,10 @@ def index(request):
             GlickoRating.objects.filter(season=season, week=week)
             .order_by("-rating")
             .select_related("team")
-            .prefetch_related("team__logos")
             .filter(team__active=True)
         )[:25]
     else:
         ratings = GlickoRating.objects.none()
-
-    for rating in ratings:
-        logo = rating.team.logos.first()
-        rating.logo_url = logo.url if logo else None
 
     context = {
         "ratings": ratings,

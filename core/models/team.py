@@ -6,9 +6,35 @@ from core.models.enums import DivisionClassification
 from core.models.venue import Venue
 
 
-class Team(models.Model):
+class TeamQuerySet(models.QuerySet):
+    """Custom ``QuerySet`` for :class:`Team`.
+
+    Provides a helper to prefetch related ``logos`` and
+    ``alternative_names`` to avoid N+1 queries.
     """
-    Represents a sports team.
+
+    def with_related(self):
+        """Prefetch logos and alternative names."""
+        return self.prefetch_related("logos", "alternative_names")
+
+
+class TeamManager(models.Manager):
+    """Manager that always prefetches team metadata."""
+
+    def get_queryset(self):
+        return TeamQuerySet(self.model, using=self._db).with_related()
+
+    def with_related(self):
+        return self.get_queryset()
+
+
+class Team(models.Model):
+    """Represents a sports team and its related metadata.
+
+    The default manager automatically prefetches ``logos`` and
+    ``alternative_names`` to keep database queries constant. The
+    ``logo_bright`` and ``logo_dark`` properties expose the first two logo
+    URLs for convenient front-end access.
     """
 
     school = models.CharField(max_length=200)
@@ -40,6 +66,8 @@ class Team(models.Model):
     )
     active = models.BooleanField(default=True)
 
+    objects = TeamManager()
+
     class Meta:
         ordering = ["school"]
         verbose_name = "team"
@@ -59,6 +87,18 @@ class Team(models.Model):
                 counter += 1
             self.slug = slug
         super().save(*args, **kwargs)
+
+    @property
+    def logo_bright(self):
+        """Return the first logo URL if available."""
+        logos = list(self.logos.all()[:1])
+        return logos[0].url if logos else None
+
+    @property
+    def logo_dark(self):
+        """Return the second logo URL if available."""
+        logos = list(self.logos.all()[:2])
+        return logos[1].url if len(logos) > 1 else None
 
 
 class TeamAlternativeName(models.Model):
