@@ -30,6 +30,7 @@
              hx-get="{% url 'index' %}"
              hx-trigger="load, refresh"
              hx-include="#season-select,#week-select"
+             hx-push-url="true"
              hx-target="#ranking-table">
             <c-ranking-table></c-ranking-table>
         </div>
