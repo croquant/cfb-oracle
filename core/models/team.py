@@ -15,7 +15,9 @@ class TeamQuerySet(models.QuerySet):
 
     def with_related(self):
         """Prefetch logos and alternative names."""
-        return self.prefetch_related("logos", "alternative_names")
+        return self.select_related("conference", "location").prefetch_related(
+            "logos", "alternative_names"
+        )
 
 
 class TeamManager(models.Manager):
