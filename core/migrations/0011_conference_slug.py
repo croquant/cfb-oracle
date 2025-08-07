@@ -18,9 +18,8 @@ def populate_slug(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ("core", "0009_glickorating_active"),
+        ("core", "0010_alter_glickorating_classification_and_more"),
     ]
 
     operations = [
@@ -36,4 +35,3 @@ class Migration(migrations.Migration):
             field=models.SlugField(max_length=50, unique=True),
         ),
     ]
-
