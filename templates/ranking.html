@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
     <c-card title="{{ title }}">
-    <div id="ranking-table">
-        <c-ranking-table></c-ranking-table>
-    </div>
+        {% include "cotton/ranking_table.html" %}
     </c-card>
 {% endblock content %}

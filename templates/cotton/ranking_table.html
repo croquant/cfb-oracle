@@ -1,27 +1,45 @@
-<table class="table table-sm border">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Team</th>
-            <th>Rating</th>
-            <th>Diff</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for rating in ratings %}
+<div id="ranking-table">
+    <form class="row mb-3" hx-get="{{ request.path }}" hx-trigger="change" hx-target="#ranking-table" hx-swap="outerHTML">
+        <div class="col">
+            <select name="season" class="form-control">
+                {% for s in seasons %}
+                    <option value="{{ s }}" {% if s == season %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col">
+            <select name="week" class="form-control">
+                {% for w in weeks %}
+                    <option value="{{ w }}" {% if w == week %}selected{% endif %}>{{ w }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+    <table class="table table-sm border">
+        <thead>
             <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>
-                    <a href="{{ rating.team.get_absolute_url }}" class="icon-link">
-                        <img src="{{ rating.team.logo_bright }}"
-                             alt="{{ rating.team.school }} logo"
-                             style="height: 1em">
-                        {{ rating.team.school }}
-                    </a>
-                </td>
-                <td>{{ rating.rating | floatformat:0 }}</td>
-                <td>{{ rating.rating_change | floatformat:0 }}</td>
+                <th>#</th>
+                <th>Team</th>
+                <th>Rating</th>
+                <th>Diff</th>
             </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% for rating in ratings %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <a href="{{ rating.team.get_absolute_url }}" class="icon-link">
+                            <img src="{{ rating.team.logo_bright }}"
+                                 alt="{{ rating.team.school }} logo"
+                                 style="height: 1em">
+                            {{ rating.team.school }}
+                        </a>
+                    </td>
+                    <td>{{ rating.rating | floatformat:0 }}</td>
+                    <td>{{ rating.rating_change | floatformat:0 }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

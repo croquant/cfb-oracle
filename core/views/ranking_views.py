@@ -1,3 +1,5 @@
+import json
+
 from django.core.cache import cache
 from django.http import Http404
 from django.views.generic import ListView
@@ -34,10 +36,15 @@ class RankingListView(ListView):
             seasons = list(
                 queryset.order_by().values_list("season", flat=True).distinct()
             )
+            seasons.sort()
             cache.set(seasons_key, seasons, 3600)
-        latest_season = max(seasons) if seasons else None
+        latest_season = seasons[-1] if seasons else None
         season = self.request.GET.get("season")
-        season = int(season) if season and season.isdigit() else latest_season
+        season = (
+            int(season)
+            if season and season.isdigit() and int(season) in seasons
+            else latest_season
+        )
 
         # Weeks
         weeks_key = f"ranking_weeks_{classification}_{season}"
@@ -47,39 +54,42 @@ class RankingListView(ListView):
                 queryset.filter(season=season) if season is not None else queryset
             )
             weeks = list(weeks_qs.order_by().values_list("week", flat=True).distinct())
+            weeks.sort()
             cache.set(weeks_key, weeks, 3600)
-        latest_week = max(weeks) if weeks else None
+        latest_week = weeks[-1] if weeks else None
         week = self.request.GET.get("week")
-        week = int(week) if week and week.isdigit() else latest_week
+        week = (
+            int(week)
+            if week and week.isdigit() and int(week) in weeks
+            else latest_week
+        )
 
         return season, week, seasons, weeks
 
     def get_queryset(self):
         classification = self.get_classification()
-        qs = GlickoRating.objects.filter(active=True).select_related("team")
+        qs = GlickoRating.objects.all().select_related("team")
 
         if classification:
-            qs = qs.filter(classification=classification)
+            qs = qs.filter(team__classification=classification)
 
-        season, week, seasons, weeks = self.get_season_and_week(qs)
+        self.season, self.week, self.seasons, self.weeks = self.get_season_and_week(qs)
         # Filter by chosen season and week
-        if season is not None:
-            qs = qs.filter(season=season)
-        if week is not None:
-            qs = qs.filter(week=week)
+        if self.season is not None:
+            qs = qs.filter(season=self.season)
+        if self.week is not None:
+            qs = qs.filter(week=self.week)
 
         return qs.order_by("-rating")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         classification = self.get_classification()
-        season, week, seasons, weeks = self.get_season_and_week(
-            GlickoRating.objects.filter(active=True)
-            .select_related("team")
-            .filter(classification=classification)
-            if classification
-            else GlickoRating.objects.filter(active=True).select_related("team")
-        )
+
+        season = getattr(self, "season", None)
+        week = getattr(self, "week", None)
+        seasons = getattr(self, "seasons", [])
+        weeks = getattr(self, "weeks", [])
 
         classification_label = (
             DivisionClassification(classification).label if classification else None
@@ -88,12 +98,24 @@ class RankingListView(ListView):
             f"{classification_label} Rankings" if classification_label else "Rankings"
         )
 
+        weeks_map = {}
+        qs = GlickoRating.objects.all().select_related("team")
+        if classification:
+            qs = qs.filter(team__classification=classification)
+        for s in seasons:
+            season_weeks = list(
+                qs.filter(season=s).order_by().values_list("week", flat=True).distinct()
+            )
+            season_weeks.sort()
+            weeks_map[s] = season_weeks
+
         context.update(
             {
                 "seasons": seasons,
                 "season": season,
                 "weeks": weeks,
                 "week": week,
+                "weeks_json": json.dumps(weeks_map),
                 "classification": classification,
                 "classification_label": classification_label,
                 "title": title,
