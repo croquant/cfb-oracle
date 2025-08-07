@@ -38,7 +38,7 @@ def index(request):
             GlickoRating.objects.filter(season=season, week=week)
             .order_by("-rating")
             .select_related("team")
-            .filter(team__active=True)
+            .filter(active=True)
         )[:25]
     else:
         ratings = GlickoRating.objects.none()
