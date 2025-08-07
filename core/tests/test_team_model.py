@@ -50,4 +50,3 @@ class TeamManagerTests(TestCase):
     def test_logo_dark_none(self):
         team = self._create_team("Single Logo Team", ["url1"], [])
         self.assertIsNone(team.logo_dark)
-
