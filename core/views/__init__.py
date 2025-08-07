@@ -1,5 +1,7 @@
-from .ranking_views import ranking_view  # noqa: F401
+from .ranking_views import RankingListView
+
+# noqa: F401
 
 __all__ = [
-    "ranking_view",
+    "RankingListView",
 ]
