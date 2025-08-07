@@ -3,7 +3,7 @@
 COVERAGE_FILE="coverage/.coverage_total"
 
 # Run tests and generate coverage
-coverage run manage.py test && coverage report
+coverage run manage.py test && coverage json && coverage report
 
 # Get current total coverage percent (as integer)
 TOTAL=$(coverage report --format=total | awk '{print int($1)}')

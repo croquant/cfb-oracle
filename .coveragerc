@@ -20,3 +20,7 @@ show_missing = true
 skip_covered = true
 skip_empty = true
 fail_under = 74
+
+[json]
+output = coverage/coverage.json
+pretty_print = true

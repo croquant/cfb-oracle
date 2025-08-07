@@ -1,0 +1,44 @@
+name: Django Tests with Coverage
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13.5"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests with coverage
+        run: |
+          ./test.sh
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+      - name: Commit updated .coverage_total
+        run: |
+          if [ -f coverage/.coverage_total ]; then
+            echo "Coverage total file already exists."
+          else
+            echo "0" > coverage/.coverage_total
+          fi
+          git config --local user.name "GitHub Actions"
+          git config --local user.email "github-actions@github.com"
+          git add coverage/.coverage_total
+          git commit -m "Update coverage total"
+          git push
