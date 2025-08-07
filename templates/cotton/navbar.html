@@ -1,10 +1,10 @@
 <!-- Halfmoon CSS Navbar -->
-<nav class="navbar navbar-expand-md bg-primary text-bg-primary border-bottom border-3 border-danger-subtle shadow mb-3">
+<nav class="navbar navbar-expand-md sticky-top bg-primary text-bg-primary border-bottom border-3 border-danger-subtle shadow mb-3">
     <div class="container-fluid">
         <!-- Brand -->
-        <a class="navbar-brand" href="#">CFB Oracle</a>
+        <a class="navbar-brand" href="{% url 'index' %}">CFB Oracle</a>
         <!-- Toggler/collapsibe Button -->
-        <button class="navbar-toggler"
+        <button class="navbar-toggler text-light"
                 type="button"
                 data-bs-toggle="collapse"
                 data-bs-target="#navbar-menu"
@@ -18,7 +18,7 @@
         <div class="collapse navbar-collapse" id="navbar-menu">
             <ul class="navbar-nav me-auto mb-2 mb-md-0">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Dashboard</a>
+                    <a class="nav-link active" aria-current="page" href="{% url 'index' %}">Dashboard</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle"
@@ -28,16 +28,16 @@
                        aria-expanded="false">Rankings</a>
                     <ul class="dropdown-menu dropdown-menu-end mt-md-2 rounded-top-0">
                         <li>
-                            <a class="dropdown-item" href="#">FBS</a>
+                            <a class="dropdown-item" href="{% url 'rankings' 'fbs' %}">FBS</a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#">FCS</a>
+                            <a class="dropdown-item" href="{% url 'rankings' 'fcs' %}">FCS</a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#">Div. II</a>
+                            <a class="dropdown-item" href="{% url 'rankings' 'ii' %}">Div. II</a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#">Div. III</a>
+                            <a class="dropdown-item" href="{% url 'rankings' 'iii' %}">Div. III</a>
                         </li>
                     </ul>
                 </li>
