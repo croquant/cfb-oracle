@@ -1,48 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-    <c-card title="{{ title }}">
-    <div x-data="rankingFilter()" class="d-flex flex-column">
-        <div class="row mb-3">
-            <div class="col">
-                <label for="season-select" class="form-label">Season</label>
-                <select id="season-select"
-                        name="season"
-                        class="form-select"
-                        x-model="season"
-                        @change="week = weeks[season][weeks[season].length - 1]; htmx.trigger('#ranking-table','refresh')">
-                    {% for s in seasons %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
-                </select>
-            </div>
-            <div class="col">
-                <label for="week-select" class="form-label">Week</label>
-                <select id="week-select"
-                        name="week"
-                        class="form-select"
-                        x-model="week"
-                        @change="htmx.trigger('#ranking-table','refresh')">
-                    <template x-for="w in weeks[season]" :key="w">
-                        <option :value="w" x-text="w"></option>
-                    </template>
-                </select>
-            </div>
-        </div>
-        <div id="ranking-table"
-             hx-get="{{ request.path }}"
-             hx-trigger="load, refresh"
-             hx-include="#season-select,#week-select"
-             hx-push-url="true"
-             hx-target="#ranking-table">
-            <c-ranking-table></c-ranking-table>
-        </div>
-    </div>
+    <c-card title="Home">
+    {% lorem 4 p %}
     </c-card>
-    <script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('rankingFilter', () => ({
-            season: {{ season }},
-            week: {{ week }},
-            weeks: {{ weeks_json|safe }}
-        }))
-    })
-    </script>
 {% endblock content %}
