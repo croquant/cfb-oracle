@@ -2,6 +2,8 @@ from django.db import models
 
 from libs.constants import DEFAULT_RATING, DEFAULT_RD, DEFAULT_VOLATILITY
 
+from .conference import Conference
+from .enums import DivisionClassification
 from .team import Team
 
 
@@ -16,6 +18,19 @@ class GlickoRating(models.Model):
     )
     season = models.PositiveIntegerField()
     week = models.PositiveIntegerField()
+    classification = models.CharField(
+        max_length=20,
+        choices=DivisionClassification.choices,
+        null=True,
+        blank=True,
+    )
+    conference = models.ForeignKey(
+        Conference,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="glicko_ratings",
+    )
     previous_rating = models.FloatField(default=DEFAULT_RATING)
     previous_rd = models.FloatField(default=DEFAULT_RD)
     previous_vol = models.FloatField(default=DEFAULT_VOLATILITY)

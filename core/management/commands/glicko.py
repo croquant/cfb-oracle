@@ -1,7 +1,7 @@
 """Management command to calculate Glicko ratings for each team."""
 
 import math
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 from django.core.management.base import BaseCommand
 from django.db.models import Avg, F, QuerySet
@@ -80,6 +80,7 @@ class Command(BaseCommand):
         )
 
         season_active_teams: set[int] = set()
+        team_meta: Dict[int, Tuple[Optional[str], Optional[int]]] = {}
         for week in weeks:
             week_matches = matches_qs.filter(week=week).order_by("start_date")
             self.stdout.write(
@@ -93,6 +94,7 @@ class Command(BaseCommand):
                 home_field_bonus,
                 margin_weight_cap,
                 season_active_teams,
+                team_meta,
             )
 
         if players:
@@ -113,9 +115,11 @@ class Command(BaseCommand):
         home_field_bonus: float,
         margin_weight_cap: float,
         season_active_teams: set[int],
+        team_meta: Dict[int, Tuple[Optional[str], Optional[int]]],
     ) -> None:
         """Process all matches for a given week."""
         results: Dict[int, List[Tuple[float, float, float, float]]] = {}
+        week_meta: Dict[int, Tuple[Optional[str], Optional[int]]] = {}
 
         for match in week_matches:
             self._process_match(
@@ -124,10 +128,13 @@ class Command(BaseCommand):
                 home_field_bonus,
                 results,
                 season_active_teams,
+                week_meta,
             )
 
+        team_meta.update(week_meta)
+
         self._update_ratings(
-            season, week, players, results, margin_weight_cap
+            season, week, players, results, margin_weight_cap, team_meta
         )
 
     def _process_match(
@@ -137,6 +144,7 @@ class Command(BaseCommand):
         home_field_bonus: float,
         results: Dict[int, List[Tuple[float, float, float, float]]],
         season_active_teams: set[int],
+        week_meta: Dict[int, Tuple[Optional[str], Optional[int]]],
     ) -> None:
         """Record the result of a single match."""
         home_division = (
@@ -154,6 +162,15 @@ class Command(BaseCommand):
         away_team = self._get_player(players, match.away_team_id, away_division)
 
         season_active_teams.update([match.home_team_id, match.away_team_id])
+
+        week_meta[match.home_team_id] = (
+            match.home_classification,
+            match.home_conference_id,
+        )
+        week_meta[match.away_team_id] = (
+            match.away_classification,
+            match.away_conference_id,
+        )
 
         home_team_outcome = 0.5
         if match.home_score > match.away_score:
@@ -186,6 +203,7 @@ class Command(BaseCommand):
         players: Dict[int, Player],
         results: Dict[int, List[Tuple[float, float, float, float]]],
         margin_weight_cap: float,
+        team_meta: Dict[int, Tuple[Optional[str], Optional[int]]],
     ) -> None:
         """Update player ratings from match results."""
         ratings = []
@@ -207,11 +225,15 @@ class Command(BaseCommand):
             else:
                 player.did_not_compete()
 
+            classification, conference_id = team_meta.get(player_id, (None, None))
+
             ratings.append(
                 GlickoRating(
                     team_id=player_id,
                     season=season,
                     week=week,
+                    classification=classification,
+                    conference_id=conference_id,
                     previous_rating=before_rating,
                     previous_rd=before_rd,
                     previous_vol=before_vol,
