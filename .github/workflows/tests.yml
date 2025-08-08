@@ -34,16 +34,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          echo ${{ secrets.GH_PAT }}
-          git config --local user.name "GitHub Actions"
-          git config --local user.email "github-actions@github.com"
-
           if [ -f coverage/.coverage_total ]; then
             echo "Coverage total file already exists."
           else
             echo "0" > coverage/.coverage_total
           fi
 
+          git config --local user.name "GitHub Actions"
+          git config --local user.email "github-actions@github.com"
+
           git add coverage/.coverage_total
           git commit -m "Update coverage total" || echo "No changes to commit"
-          git push https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }} HEAD:${{ github.ref_name }}
+
+          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}
+          git push origin HEAD:${{ github.ref_name }}
