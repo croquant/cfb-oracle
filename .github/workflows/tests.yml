@@ -34,6 +34,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
+          echo ${{ secrets.GH_PAT }}
           git config --local user.name "GitHub Actions"
           git config --local user.email "github-actions@github.com"
 
