@@ -102,6 +102,16 @@ class TeamManagerTests(TestCase):
         self.assertEqual(t2.slug, "slug-school-1")
         self.assertEqual(t3.slug, "slug-school-2")
 
+    def test_save_preserves_existing_slug(self):
+        """Saving again shouldn't alter a valid, unique slug."""
+        team = self._create_team("Persistent Slug", [], [])
+
+        # Slug is generated on initial save; calling save again should leave it
+        # untouched because it already matches the slugified school name.
+        original = team.slug
+        team.save()
+        self.assertEqual(team.slug, original)
+
     def test_team_alternative_name_str(self):
         """``TeamAlternativeName.__str__`` returns '<name> (<school>)'."""
         team = self._create_team("Name Team", [], ["Nickname"])
