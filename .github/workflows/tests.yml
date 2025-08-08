@@ -29,13 +29,3 @@ jobs:
         with:
           name: coverage-report
           path: coverage/
-
-      - name: Commit updated .coverage_total
-        uses: EndBug/add-and-commit@v9
-        with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
-          add: "coverage/.coverage_total"
-          default_author: github_actions
-          message: "Update coverage total"
-          tag: "coverage_total_update"
