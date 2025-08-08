@@ -29,11 +29,14 @@ class TeamManagerTests(TestCase):
         return team
 
     def test_prefetch_related(self):
+        """The default manager should prefetch logos and alt names."""
         for idx in range(3):
+            # Each team gets two logos and one alternative name
             self._create_team(
                 f"Tech {idx}", [f"url{idx}a", f"url{idx}b"], [f"Alt {idx}"]
             )
 
+        # Accessing related fields should not incur extra queries
         with CaptureQueriesContext(connection) as ctx:
             teams = list(Team.objects.filter(school__icontains="Tech"))
             for team in teams:
@@ -41,21 +44,26 @@ class TeamManagerTests(TestCase):
                 team.logo_dark
                 list(team.alternative_names.all())
 
+        # One query for teams, one for logos, and one for alt names
         self.assertEqual(len(ctx.captured_queries), 3)
 
     def test_logo_bright(self):
+        """``logo_bright`` returns the first logo URL."""
         team = self._create_team("Bright Team", ["url1", "url2"], [])
         self.assertEqual(team.logo_bright, "url1")
 
     def test_logo_bright_none(self):
+        """``logo_bright`` is ``None`` when no logos exist."""
         team = self._create_team("No Logo Team", [], [])
         self.assertIsNone(team.logo_bright)
 
     def test_logo_dark(self):
+        """``logo_dark`` returns the second logo URL."""
         team = self._create_team("Dark Team", ["url1", "url2", "url3"], [])
         self.assertEqual(team.logo_dark, "url2")
 
     def test_logo_dark_none(self):
+        """``logo_dark`` is ``None`` when fewer than two logos exist."""
         team = self._create_team("Single Logo Team", ["url1"], [])
         self.assertIsNone(team.logo_dark)
 
