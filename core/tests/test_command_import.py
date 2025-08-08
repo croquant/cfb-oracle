@@ -1,6 +1,7 @@
 import io
 from argparse import ArgumentParser
 from datetime import date, datetime
+from importlib import import_module
 from types import SimpleNamespace as NS
 from unittest.mock import MagicMock, patch
 
@@ -8,8 +9,6 @@ import cfbd
 from cfbd.rest import ApiException
 from django.core.management.base import CommandError
 from django.test import TestCase
-
-from importlib import import_module
 
 Command = import_module("core.management.commands.import").Command
 from core.models.conference import Conference
@@ -257,7 +256,8 @@ class ImportCommandTests(TestCase):
         self.assertEqual(m1.home_score, 30)
         self.assertEqual(m1.away_score, 20)
 
-    def test_handle_requires_api_key(self):
+    @patch("core.management.commands.import.load_dotenv")
+    def test_handle_requires_api_key(self, mock_load_dotenv):
         """``handle`` raises :class:`CommandError` when API key is missing."""
         with patch.dict("os.environ", {}, clear=True):
             with self.assertRaises(CommandError):
