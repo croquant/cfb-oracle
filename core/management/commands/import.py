@@ -5,6 +5,7 @@ from datetime import date
 import cfbd
 from cfbd.rest import ApiException
 from django.core.management.base import BaseCommand, CommandError
+from django.utils import timezone
 from dotenv import load_dotenv
 
 from core.models.conference import Conference
@@ -184,13 +185,16 @@ class Command(BaseCommand):
                 year=season, season_type=cfbd.SeasonType.BOTH
             )
             for game in games_response:
+                start_date = game.start_date
+                if timezone.is_naive(start_date):
+                    start_date = timezone.make_aware(start_date)
                 Match.objects.update_or_create(
                     id=game.id,
                     defaults={
                         "season": game.season,
                         "week": game.week,
                         "season_type": game.season_type.value,
-                        "start_date": game.start_date,
+                        "start_date": start_date,
                         "completed": game.completed,
                         "venue": venues_by_id.get(game.venue_id),
                         "neutral_site": game.neutral_site,
