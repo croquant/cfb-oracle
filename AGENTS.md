@@ -1,6 +1,7 @@
-> **_NOTE:_** These instructions are meant to be read by AI agents
+> **_NOTE:_** These instructions are intended for AI agents
 
 ## Project Overview
+
 - Django 5 application for ranking and predicting college football games.
 - `core/` holds the main app:
   - models for teams, matches, venues, conferences, and Glicko ratings.
@@ -11,17 +12,20 @@
 - Tests reside in `tests/` mirroring the app structure.
 
 ## Development
+
 - Python dependencies are in `requirements.txt`.
 - Use `.env.example` as a reference for required environment variables.
 - Linting and formatting are enforced by **Ruff** (`ruff.toml`).
 - `pre-commit` runs Ruff, Django system checks, migration checks, and the test suite.
 
 ## Testing & Coverage
+
 - Always use `./test.sh` to run tests and check code coverage.
 - The coverage report is generated at `coverage/coverage.json`.
 - Review the coverage report to ensure your changes maintain or improve test coverage.
 
 ## Pre-commit & Coverage Notes
+
 `pre-commit` enforces formatting, linting, and coverage tracking.
 
 1. Run `pre-commit run --files <paths>` or `git commit` to trigger the hooks.
