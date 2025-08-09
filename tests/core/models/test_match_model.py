@@ -39,18 +39,17 @@ class MatchModelTests(TestCase):
 
     def test_completed_match_requires_scores(self):
         """Completed matches must include scores."""
-        with self.assertRaises(IntegrityError):
-            with transaction.atomic():
-                Match.objects.create(
-                    season=2023,
-                    week=1,
-                    season_type=SeasonType.REGULAR,
-                    start_date=self.start,
-                    completed=True,
-                    home_team=self.home_team,
-                    away_team=self.away_team,
-                    home_score=21,
-                )
+        with transaction.atomic(), self.assertRaises(IntegrityError):
+            Match.objects.create(
+                season=2023,
+                week=1,
+                season_type=SeasonType.REGULAR,
+                start_date=self.start,
+                completed=True,
+                home_team=self.home_team,
+                away_team=self.away_team,
+                home_score=21,
+            )
 
     def test_str_returns_matchup_and_date(self):
         """``__str__`` returns the matchup and start date."""

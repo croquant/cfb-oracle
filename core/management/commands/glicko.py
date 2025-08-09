@@ -47,7 +47,7 @@ class Command(BaseCommand):
             Team.objects.bulk_update(
                 [
                     Team(id=team_id, active=(team_id in last_active_teams))
-                    for team_id in players.keys()
+                    for team_id in players
                 ],
                 fields=["active"],
             )

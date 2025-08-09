@@ -267,14 +267,16 @@ class ImportCommandTests(TestCase):
     @patch("core.management.commands.cfbd_import.load_dotenv")
     def test_handle_requires_api_key(self, mock_load_dotenv):
         """``handle`` raises :class:`CommandError` when API key is missing."""
-        with patch.dict("os.environ", {}, clear=True):
-            with self.assertRaises(CommandError):
-                self.command.handle(
-                    conference=None,
-                    year=None,
-                    start_year=2023,
-                    end_year=2023,
-                )
+        with (
+            patch.dict("os.environ", {}, clear=True),
+            self.assertRaises(CommandError),
+        ):
+            self.command.handle(
+                conference=None,
+                year=None,
+                start_year=2023,
+                end_year=2023,
+            )
 
     @patch("core.management.commands.cfbd_import.cfbd.ApiClient")
     @patch("core.management.commands.cfbd_import.cfbd.GamesApi")
