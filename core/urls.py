@@ -1,3 +1,5 @@
+"""URL routing configuration for the core app."""
+
 from django.urls import path
 
 from .views.index_view import index_view
