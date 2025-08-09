@@ -1,3 +1,5 @@
+"""Admin site registrations and exports."""
+
 from .base_admin import GroupAdmin, UserAdmin
 from .conference_admin import ConferenceAdmin
 from .match_admin import MatchAdmin

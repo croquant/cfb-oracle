@@ -1,4 +1,7 @@
+"""Admin configuration for team-related models."""
+
 from django.contrib import admin
+from django.db.models.query import QuerySet
 from django.templatetags.static import static
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
@@ -9,6 +12,8 @@ from core.models.venue import Venue
 
 
 class TeamAlternativeNameTabularInline(TabularInline):
+    """Inline for alternative team names."""
+
     model = TeamAlternativeName
     fields = ("name",)
     extra = 0
@@ -17,6 +22,8 @@ class TeamAlternativeNameTabularInline(TabularInline):
 
 
 class TeamLogoInline(TabularInline):
+    """Inline for team logos with preview."""
+
     model = TeamLogo
     fields = ("url", "preview")
     readonly_fields = ("preview",)
@@ -24,7 +31,8 @@ class TeamLogoInline(TabularInline):
     hide_title = True
     tab = True
 
-    def preview(self, obj):
+    def preview(self, obj: TeamLogo) -> str:
+        """Render a preview of the logo."""
         if obj.url:
             return format_html(f'<img src="{obj.url}" class="h-16" />')
         placeholder_url = static("images/logo_placeholder.png")
@@ -34,6 +42,8 @@ class TeamLogoInline(TabularInline):
 
 
 class VenueInline(NonrelatedStackedInline):
+    """Inline for venue information associated with a team."""
+
     model = Venue
     extra = 0
     max_num = 1
@@ -59,17 +69,21 @@ class VenueInline(NonrelatedStackedInline):
         ),
     )
 
-    def get_form_queryset(self, obj):
+    def get_form_queryset(self, obj: Team | None) -> QuerySet[Venue]:
+        """Return queryset for the inline form."""
         if obj and obj.location:
             return Venue.objects.filter(pk=obj.location.pk)
         return Venue.objects.none()
 
-    def save_new_instance(self, parent, obj):
+    def save_new_instance(self, parent: Team, obj: Venue) -> None:
+        """Persist the newly created venue on the team."""
         parent.location = obj
 
 
 @admin.register(Team)
 class TeamAdmin(ModelAdmin):
+    """Admin configuration for the Team model."""
+
     search_fields = ("school", "mascot")
     list_display = (
         "logo_display",
@@ -101,9 +115,11 @@ class TeamAdmin(ModelAdmin):
         ),
     )
 
-    def logo_display(self, obj):
+    def logo_display(self, obj: Team) -> str | None:
+        """Render the team's logo or return ``None`` if missing."""
         logo = obj.logos.first()
         if logo:
             return format_html(f'<img src="{logo.url}" class="h-8" />')
+        return None
 
     logo_display.short_description = "Logo"

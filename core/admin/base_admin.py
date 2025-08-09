@@ -1,3 +1,5 @@
+"""Base admin classes for User and Group models."""
+
 from django.contrib import admin
 from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -15,6 +17,8 @@ admin.site.unregister(Group)
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin, ModelAdmin):
+    """Admin configuration for built-in user model."""
+
     # Forms loaded from `unfold.forms`
     form = UserChangeForm
     add_form = UserCreationForm
@@ -23,4 +27,6 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
 
 @admin.register(Group)
 class GroupAdmin(BaseGroupAdmin, ModelAdmin):
+    """Admin configuration for built-in group model."""
+
     pass
