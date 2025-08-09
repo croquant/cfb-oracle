@@ -10,16 +10,20 @@ exclude = [
     "venv",
     "coverage/",
     "core/migrations/",
+    "manage.py",
 ]
 
 [lint]
-select = ["E", "F", "B", "DJ", "I", "N", "UP", "SIM", "T20"]
+select = ["E", "F", "B", "DJ", "I", "N", "UP", "SIM", "T20", "S", "ANN"]
 ignore = []
 fixable = ["ALL"]
 unfixable = []
 
-# Allow unused variables when underscore-prefixed.
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+[lint.per-file-ignores]
+"core/**" = ["ANN"]
+"libs/**" = ["ANN"]
+"tests/**" = ["ANN"]
+
 
 [format]
 quote-style = "double"
