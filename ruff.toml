@@ -28,7 +28,6 @@ unfixable = []
 "config/**" = ["D"]
 "core/management/commands/**" = ["ANN", "D"]
 "core/views/**" = ["ANN", "D"]
-"core/models/**" = ["D"]                     # TODO remove ignore rule from core/models
 "core/admin/**" = ["ANN", "D"]
 "tests/**" = ["ANN", "D"]
 

@@ -1,3 +1,5 @@
+"""Enum definitions for core models."""
+
 from django.db import models
 
 

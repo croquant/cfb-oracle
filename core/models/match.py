@@ -1,3 +1,5 @@
+"""Models for football matches between teams."""
+
 from django.db import models
 
 from core.models.conference import Conference
@@ -69,6 +71,8 @@ class Match(models.Model):
     away_score = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
+        """Metadata for Match model."""
+
         constraints = [
             models.CheckConstraint(
                 check=(
@@ -85,4 +89,5 @@ class Match(models.Model):
         ordering = ["-start_date"]
 
     def __str__(self) -> str:
+        """Return a readable description of the match."""
         return f"{self.home_team} vs {self.away_team} on {self.start_date}"

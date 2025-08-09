@@ -1,3 +1,5 @@
+"""Models for athletic conferences."""
+
 from django.db import models
 from django.utils.text import slugify
 
@@ -18,14 +20,18 @@ class Conference(models.Model):
     )
 
     class Meta:
+        """Metadata for Conference model."""
+
         ordering = ["name"]
         verbose_name = "conference"
         verbose_name_plural = "conferences"
 
     def __str__(self) -> str:
+        """Return the conference name."""
         return self.name
 
     def save(self, *args: object, **kwargs: object) -> None:
+        """Generate a unique slug before saving."""
         if (
             not self.slug
             or self.slug == ""

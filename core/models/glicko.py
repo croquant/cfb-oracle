@@ -1,3 +1,5 @@
+"""Glicko rating model for tracking team performance."""
+
 from django.db import models
 
 from libs.constants import DEFAULT_RATING, DEFAULT_RD, DEFAULT_VOLATILITY
@@ -46,6 +48,8 @@ class GlickoRating(models.Model):
     )
 
     class Meta:
+        """Metadata for GlickoRating model."""
+
         ordering = ["season", "week", "team_id"]
         verbose_name = "glicko rating"
         verbose_name_plural = "glicko ratings"
@@ -58,4 +62,5 @@ class GlickoRating(models.Model):
         indexes = [models.Index(fields=["team", "season", "week"])]
 
     def __str__(self) -> str:
+        """Return the rating for display."""
         return f"{self.season}-{self.week} {self.team}: {self.rating}"
