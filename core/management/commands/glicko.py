@@ -1,7 +1,7 @@
 """Management command to calculate Glicko ratings for each team."""
 
 import math
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 from django.core.management.base import BaseCommand
 from django.db.models import Avg, F, QuerySet
@@ -32,7 +32,7 @@ class Command(BaseCommand):
 
         self.stdout.write("Calculating Glicko ratings...")
 
-        players: Dict[int, Player] = {}
+        players: dict[int, Player] = {}
         seasons = list(
             Match.objects.order_by("season")
             .values_list("season", flat=True)
@@ -57,7 +57,7 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
     @staticmethod
     def _get_player(
-        players: Dict[int, Player], team_id: int, division
+        players: dict[int, Player], team_id: int, division
     ) -> Player:
         """Retrieve or create a :class:`Player` for the given team."""
         player = players.get(team_id)
@@ -69,7 +69,7 @@ class Command(BaseCommand):
         return player
 
     def _process_season(
-        self, season: int, players: Dict[int, Player]
+        self, season: int, players: dict[int, Player]
     ) -> set[int]:
         """Process all matches for a single season."""
         matches_qs = Match.objects.filter(season=season, completed=True)
@@ -104,7 +104,7 @@ class Command(BaseCommand):
         )
 
         season_active_teams: set[int] = set()
-        team_meta: Dict[int, Tuple[Optional[str], Optional[int]]] = {}
+        team_meta: dict[int, tuple[Optional[str], Optional[int]]] = {}
         for week in weeks:
             week_matches = matches_qs.filter(week=week).order_by("start_date")
             self.stdout.write(
@@ -129,15 +129,15 @@ class Command(BaseCommand):
         season: int,
         week: int,
         week_matches: QuerySet,
-        players: Dict[int, Player],
+        players: dict[int, Player],
         home_field_bonus: float,
         margin_weight_cap: float,
         season_active_teams: set[int],
-        team_meta: Dict[int, Tuple[Optional[str], Optional[int]]],
+        team_meta: dict[int, tuple[Optional[str], Optional[int]]],
     ) -> None:
         """Process all matches for a given week."""
-        results: Dict[int, List[Tuple[float, float, float, float]]] = {}
-        week_meta: Dict[int, Tuple[Optional[str], Optional[int]]] = {}
+        results: dict[int, list[tuple[float, float, float, float]]] = {}
+        week_meta: dict[int, tuple[Optional[str], Optional[int]]] = {}
 
         for match in week_matches:
             self._process_match(
@@ -164,11 +164,11 @@ class Command(BaseCommand):
     def _process_match(
         self,
         match,
-        players: Dict[int, Player],
+        players: dict[int, Player],
         home_field_bonus: float,
-        results: Dict[int, List[Tuple[float, float, float, float]]],
+        results: dict[int, list[tuple[float, float, float, float]]],
         season_active_teams: set[int],
-        week_meta: Dict[int, Tuple[Optional[str], Optional[int]]],
+        week_meta: dict[int, tuple[Optional[str], Optional[int]]],
     ) -> None:
         """Record the result of a single match."""
         home_division = (
@@ -224,10 +224,10 @@ class Command(BaseCommand):
         self,
         season: int,
         week: int,
-        players: Dict[int, Player],
-        results: Dict[int, List[Tuple[float, float, float, float]]],
+        players: dict[int, Player],
+        results: dict[int, list[tuple[float, float, float, float]]],
         margin_weight_cap: float,
-        team_meta: Dict[int, Tuple[Optional[str], Optional[int]]],
+        team_meta: dict[int, tuple[Optional[str], Optional[int]]],
         season_active_teams: set[int],
     ) -> None:
         """Update player ratings from match results."""
