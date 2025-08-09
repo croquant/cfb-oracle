@@ -5,7 +5,7 @@
 - Django 5 application for ranking and predicting college football games.
 - `core/` holds the main app:
   - models for teams, matches, venues, conferences, and Glicko ratings.
-  - management commands like `import` (ingest data) and `glicko` (calculate ratings).
+  - management commands like `cfbd_import` (ingest data) and `glicko` (calculate ratings).
   - views, admin customizations, and URLs.
 - `libs/` contains shared utilities such as a Glicko-2 rating implementation and constants.
 - `templates/` stores Django templates (base layout, ranking table, etc.).
