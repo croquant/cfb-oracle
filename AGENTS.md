@@ -1,3 +1,5 @@
+> **_NOTE:_** These instructions are meant to be read by AI agents
+
 ## Testing & Coverage
 
 - Always use `./test.sh` to run tests and check code coverage.
