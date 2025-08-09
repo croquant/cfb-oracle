@@ -9,6 +9,7 @@ import cfbd
 from cfbd.rest import ApiException
 from django.core.management.base import CommandError
 from django.test import TestCase
+from django.utils import timezone
 
 Command = import_module("core.management.commands.import").Command
 from core.models.conference import Conference
@@ -189,6 +190,7 @@ class ImportCommandTests(TestCase):
         self._import_prerequisites()
         self._import_sample_teams()
 
+        aware_start = timezone.make_aware(datetime(2023, 9, 8))
         games_by_year = {
             2023: [
                 self._ns(
@@ -217,7 +219,7 @@ class ImportCommandTests(TestCase):
                     season=2023,
                     week=2,
                     season_type=cfbd.SeasonType.REGULAR,
-                    start_date=datetime(2023, 9, 8),
+                    start_date=aware_start,
                     completed=False,
                     venue_id=1,
                     neutral_site=True,
@@ -240,6 +242,9 @@ class ImportCommandTests(TestCase):
 
         m1 = Match.objects.get(id=10)
         m2 = Match.objects.get(id=11)
+
+        self.assertTrue(timezone.is_aware(m1.start_date))
+        self.assertEqual(m2.start_date, aware_start)
 
         self.assertEqual(m1.home_team_id, 1)
         self.assertEqual(m1.home_conference.abbreviation, "ACC")
