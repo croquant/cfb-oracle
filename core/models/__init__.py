@@ -1,3 +1,5 @@
+"""Expose core data models for external use."""
+
 from .conference import Conference, DivisionClassification
 from .glicko import GlickoRating
 from .match import Match

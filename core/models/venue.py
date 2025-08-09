@@ -1,10 +1,10 @@
+"""Models for game venues."""
+
 from django.db import models
 
 
 class Venue(models.Model):
-    """
-    Represents a venue or stadium.
-    """
+    """Represents a venue or stadium."""
 
     name = models.CharField(max_length=200)
     city = models.CharField(max_length=100)
@@ -21,9 +21,12 @@ class Venue(models.Model):
     dome = models.BooleanField(null=True, blank=True)
 
     class Meta:
+        """Metadata for Venue model."""
+
         ordering = ["name"]
         verbose_name = "venue"
         verbose_name_plural = "venues"
 
     def __str__(self) -> str:
+        """Return a readable representation of the venue."""
         return f"{self.name} ({self.city}, {self.state})"

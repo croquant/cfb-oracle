@@ -1,3 +1,5 @@
+"""Models for teams and related metadata."""
+
 from django.db import models
 from django.utils.text import slugify
 
@@ -7,7 +9,8 @@ from core.models.venue import Venue
 
 
 class TeamQuerySet(models.QuerySet):
-    """Custom ``QuerySet`` for :class:`Team`.
+    """
+    Custom ``QuerySet`` for :class:`Team`.
 
     Provides a helper to prefetch related ``logos`` and
     ``alternative_names`` to avoid N+1 queries.
@@ -24,14 +27,17 @@ class TeamManager(models.Manager):
     """Manager that always prefetches team metadata."""
 
     def get_queryset(self) -> "TeamQuerySet":
+        """Return a queryset with related data prefetched."""
         return TeamQuerySet(self.model, using=self._db).with_related()
 
     def with_related(self) -> "TeamQuerySet":
+        """Return a queryset with related data prefetched."""
         return self.get_queryset()
 
 
 class Team(models.Model):
-    """Represents a sports team and its related metadata.
+    """
+    Represents a sports team and its related metadata.
 
     The default manager automatically prefetches ``logos`` and
     ``alternative_names`` to keep database queries constant. The
@@ -70,15 +76,19 @@ class Team(models.Model):
     objects = TeamManager()
 
     class Meta:
+        """Metadata for Team model."""
+
         ordering = ["school"]
         verbose_name = "team"
         verbose_name_plural = "teams"
 
     def __str__(self) -> str:
+        """Return the team name and mascot."""
         mascot = f" {self.mascot}" if self.mascot else ""
         return f"{self.school}{mascot}"
 
     def save(self, *args: object, **kwargs: object) -> None:
+        """Generate a unique slug before saving."""
         if (
             not self.slug
             or self.slug == ""
@@ -107,9 +117,7 @@ class Team(models.Model):
 
 
 class TeamAlternativeName(models.Model):
-    """
-    Stores alternative names for a team.
-    """
+    """Store alternative names for a team."""
 
     team = models.ForeignKey(
         Team, on_delete=models.CASCADE, related_name="alternative_names"
@@ -117,6 +125,8 @@ class TeamAlternativeName(models.Model):
     name = models.CharField(max_length=200)
 
     class Meta:
+        """Metadata for TeamAlternativeName model."""
+
         constraints = [
             models.UniqueConstraint(
                 fields=["team", "name"],
@@ -127,6 +137,7 @@ class TeamAlternativeName(models.Model):
         verbose_name_plural = "team alternative names"
 
     def __str__(self) -> str:
+        """Return the alternative name with its team."""
         return f"{self.name} ({self.team.school})"
 
 
@@ -141,8 +152,11 @@ class TeamLogo(models.Model):
     url = models.URLField()
 
     class Meta:
+        """Metadata for TeamLogo model."""
+
         verbose_name = "team logo"
         verbose_name_plural = "team logos"
 
     def __str__(self) -> str:
+        """Return a readable representation of the logo."""
         return f"Logo for {self.team.school}: {self.url}"
