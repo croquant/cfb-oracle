@@ -25,5 +25,5 @@ class Venue(models.Model):
         verbose_name = "venue"
         verbose_name_plural = "venues"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} ({self.city}, {self.state})"

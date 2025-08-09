@@ -33,7 +33,7 @@ unfixable = []
 "config/**" = ["D"]
 "core/management/commands/**" = ["ANN", "D"]
 "core/views/**" = ["ANN", "D"]
-"core/models/**" = ["ANN", "D"]              # TODO : remove ANN rule from core/models
+"core/models/**" = ["D"]
 "core/admin/**" = ["ANN", "D"]
 "tests/**" = ["ANN", "D"]
 

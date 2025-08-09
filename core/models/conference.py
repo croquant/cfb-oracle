@@ -25,7 +25,7 @@ class Conference(models.Model):
     def __str__(self) -> str:
         return self.name
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: object, **kwargs: object) -> None:
         if (
             not self.slug
             or self.slug == ""
