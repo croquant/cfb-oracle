@@ -40,8 +40,8 @@ class TeamManagerTests(TestCase):
         with CaptureQueriesContext(connection) as ctx:
             teams = list(Team.objects.filter(school__icontains="Tech"))
             for team in teams:
-                team.logo_bright
-                team.logo_dark
+                _ = team.logo_bright
+                _ = team.logo_dark
                 list(team.alternative_names.all())
 
         # One query for teams, one for logos, and one for alt names
@@ -84,8 +84,8 @@ class TeamManagerTests(TestCase):
                 )
             )
             for team in teams:
-                team.logo_bright
-                team.logo_dark
+                _ = team.logo_bright
+                _ = team.logo_dark
                 list(team.alternative_names.all())
 
         self.assertEqual(len(ctx.captured_queries), 3)

@@ -13,7 +13,7 @@ exclude = [
 ]
 
 [lint]
-select = ["E", "F"]
+select = ["E", "F", "B"]
 ignore = []
 fixable = ["ALL"]
 unfixable = []
