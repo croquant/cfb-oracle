@@ -25,11 +25,11 @@ fixable = ["ALL"]
 unfixable = []
 
 [lint.per-file-ignores]
-"config/**" = ["D"]
-"core/management/commands/**" = ["ANN", "D"]
-"core/views/**" = ["ANN", "D"]
-"core/admin/**" = ["ANN", "D"]
-"tests/**" = ["ANN", "D"]
+"config/**" = ["D"]                          # TODO remove ignore rule from config
+"core/views/**" = ["ANN", "D"]               # TODO remove ignore rule from core/views
+"core/admin/**" = ["ANN", "D"]               # TODO remove ignore rule from core/admin
+"core/management/commands/**" = ["ANN", "D"] # Keep
+"tests/**" = ["ANN", "D"]                    # Keep
 
 
 [format]
