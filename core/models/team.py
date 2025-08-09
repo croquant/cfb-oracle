@@ -13,7 +13,7 @@ class TeamQuerySet(models.QuerySet):
     ``alternative_names`` to avoid N+1 queries.
     """
 
-    def with_related(self):
+    def with_related(self) -> "TeamQuerySet":
         """Prefetch logos and alternative names."""
         return self.select_related("conference", "location").prefetch_related(
             "logos", "alternative_names"
@@ -23,10 +23,10 @@ class TeamQuerySet(models.QuerySet):
 class TeamManager(models.Manager):
     """Manager that always prefetches team metadata."""
 
-    def get_queryset(self):
+    def get_queryset(self) -> "TeamQuerySet":
         return TeamQuerySet(self.model, using=self._db).with_related()
 
-    def with_related(self):
+    def with_related(self) -> "TeamQuerySet":
         return self.get_queryset()
 
 
@@ -74,11 +74,11 @@ class Team(models.Model):
         verbose_name = "team"
         verbose_name_plural = "teams"
 
-    def __str__(self):
+    def __str__(self) -> str:
         mascot = f" {self.mascot}" if self.mascot else ""
         return f"{self.school}{mascot}"
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: object, **kwargs: object) -> None:
         if (
             not self.slug
             or self.slug == ""
@@ -94,13 +94,13 @@ class Team(models.Model):
         super().save(*args, **kwargs)
 
     @property
-    def logo_bright(self):
+    def logo_bright(self) -> str | None:
         """Return the first logo URL if available."""
         logos = list(self.logos.all()[:1])
         return logos[0].url if logos else None
 
     @property
-    def logo_dark(self):
+    def logo_dark(self) -> str | None:
         """Return the second logo URL if available."""
         logos = list(self.logos.all()[:2])
         return logos[1].url if len(logos) > 1 else None
@@ -126,7 +126,7 @@ class TeamAlternativeName(models.Model):
         verbose_name = "team alternative name"
         verbose_name_plural = "team alternative names"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} ({self.team.school})"
 
 
@@ -144,5 +144,5 @@ class TeamLogo(models.Model):
         verbose_name = "team logo"
         verbose_name_plural = "team logos"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Logo for {self.team.school}: {self.url}"

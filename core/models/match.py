@@ -84,5 +84,5 @@ class Match(models.Model):
         ]
         ordering = ["-start_date"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.home_team} vs {self.away_team} on {self.start_date}"

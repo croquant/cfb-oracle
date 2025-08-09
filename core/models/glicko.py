@@ -57,5 +57,5 @@ class GlickoRating(models.Model):
         ]
         indexes = [models.Index(fields=["team", "season", "week"])]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.season}-{self.week} {self.team}: {self.rating}"
