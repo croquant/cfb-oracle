@@ -10,7 +10,6 @@ exclude = [
     "venv",
     "coverage/",
     "core/migrations/",
-    "manage.py",
 ]
 
 [lint]
