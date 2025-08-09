@@ -27,8 +27,7 @@ class Command(BaseCommand):
             "--year",
             type=int,
             help=(
-                "Optional year filter to get historical "
-                "conference affiliations"
+                "Optional year filter to get historical conference affiliations"
             ),
         )
         parser.add_argument(

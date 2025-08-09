@@ -186,8 +186,7 @@ class Player:
 
         """
         return 1 / (
-            1
-            + math.exp(-1 * self._g(p2rd) * (self.__rating - p2rating))
+            1 + math.exp(-1 * self._g(p2rd) * (self.__rating - p2rating))
         )
 
     def _g(self, rd):
