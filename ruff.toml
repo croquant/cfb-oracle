@@ -22,7 +22,6 @@ unfixable = []
 [lint.per-file-ignores]
 "config/**" = ["D"]
 "core/**" = ["ANN", "D"]
-"libs/**" = ["ANN", "D"]
 "tests/**" = ["ANN", "D"]
 
 
