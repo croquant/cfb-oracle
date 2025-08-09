@@ -1,9 +1,11 @@
-import os
 import math
+import os
+
 import django
 from django.test import TestCase
-from libs.glicko2 import Player
+
 from libs.constants import GLICKO2_SCALER
+from libs.glicko2 import Player
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()

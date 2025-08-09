@@ -10,6 +10,7 @@ from cfbd.rest import ApiException
 from django.core.management.base import CommandError
 from django.test import TestCase
 from django.utils import timezone
+
 from core.models.conference import Conference
 from core.models.match import Match
 from core.models.team import Team

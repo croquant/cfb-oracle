@@ -1,8 +1,8 @@
 from django.test import TestCase
 
+from core.models.enums import DivisionClassification
 from core.models.glicko import GlickoRating
 from core.models.team import Team
-from core.models.enums import DivisionClassification
 
 
 class GlickoRatingModelTests(TestCase):
