@@ -23,6 +23,7 @@ select = [
     "ANN",
     "D",
     "TD",
+    "C4",
 ]
 ignore = ["D203", "D212"]
 fixable = ["ALL"]
@@ -32,7 +33,7 @@ unfixable = []
 "config/**" = ["D"]
 "core/management/commands/**" = ["ANN", "D"]
 "core/views/**" = ["ANN", "D"]
-"core/models/**" = ["ANN", "D"]
+"core/models/**" = ["ANN", "D"]              # TODO : remove ANN rule from core/models
 "core/admin/**" = ["ANN", "D"]
 "tests/**" = ["ANN", "D"]
 
