@@ -1,7 +1,7 @@
 """Management command to calculate Glicko ratings for each team."""
 
 import math
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional, Tuple
 
 from django.core.management.base import BaseCommand
 from django.db.models import Avg, F, QuerySet
@@ -25,7 +25,7 @@ class Command(BaseCommand):
 
     help = "Calculate Glicko ratings for each team in each week"
 
-    def handle(self, *args, **options):  # noqa: D401 - inherited from BaseCommand
+    def handle(self, *args, **options):
         """Run the Glicko rating calculation."""
         self.stdout.write("Clearing existing ratings...")
         GlickoRating.objects.all().delete()
@@ -34,7 +34,9 @@ class Command(BaseCommand):
 
         players: Dict[int, Player] = {}
         seasons = list(
-            Match.objects.order_by("season").values_list("season", flat=True).distinct()
+            Match.objects.order_by("season")
+            .values_list("season", flat=True)
+            .distinct()
         )
 
         last_active_teams: set[int] = set()
@@ -54,7 +56,9 @@ class Command(BaseCommand):
     # Helpers
     # ------------------------------------------------------------------
     @staticmethod
-    def _get_player(players: Dict[int, Player], team_id: int, division) -> Player:
+    def _get_player(
+        players: Dict[int, Player], team_id: int, division
+    ) -> Player:
         """Retrieve or create a :class:`Player` for the given team."""
         player = players.get(team_id)
         if player is None:
@@ -64,15 +68,21 @@ class Command(BaseCommand):
             players[team_id] = player
         return player
 
-    def _process_season(self, season: int, players: Dict[int, Player]) -> set[int]:
+    def _process_season(
+        self, season: int, players: Dict[int, Player]
+    ) -> set[int]:
         """Process all matches for a single season."""
         matches_qs = Match.objects.filter(season=season, completed=True)
         if matches_qs.count() == 0:
-            self.stdout.write(f"No matches found for season {season}. Skipping...")
+            self.stdout.write(
+                f"No matches found for season {season}. Skipping..."
+            )
             return set()
 
         prev_season = season - 1
-        prev_matches_qs = Match.objects.filter(season=prev_season, completed=True)
+        prev_matches_qs = Match.objects.filter(
+            season=prev_season, completed=True
+        )
         prev_season_avg_rating = GlickoRating.objects.filter(
             season=prev_season
         ).aggregate(avg_rating=Avg("rating"))["avg_rating"]
@@ -83,7 +93,9 @@ class Command(BaseCommand):
         margin_weight_cap = self._calculate_margin_weight_cap(prev_matches_qs)
 
         weeks = list(
-            matches_qs.order_by("week").values_list("week", flat=True).distinct()
+            matches_qs.order_by("week")
+            .values_list("week", flat=True)
+            .distinct()
         )
         self.stdout.write(
             f"Processing season {season}... {matches_qs.count()} matches found across {len(weeks)} weeks."
@@ -235,7 +247,9 @@ class Command(BaseCommand):
             else:
                 player.did_not_compete()
 
-            classification, conference_id = team_meta.get(player_id, (None, None))
+            classification, conference_id = team_meta.get(
+                player_id, (None, None)
+            )
 
             ratings.append(
                 GlickoRating(
