@@ -1,26 +1,24 @@
-"""
+"""Glicko-2 rating system implementation.
+
 Copyright (c) 2009 Ryan Kirkman
 
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 """
 
 import math
@@ -36,18 +34,24 @@ from .constants import (
 
 
 class Player:
+    """Represents a competitor in the Glicko-2 rating system."""
+
     def get_rating(self) -> float:
+        """Return the player's rating."""
         return (self.__rating * GLICKO2_SCALER) + DEFAULT_RATING
 
     def set_rating(self, rating: float) -> None:
+        """Set the player's rating."""
         self.__rating = (rating - DEFAULT_RATING) / GLICKO2_SCALER
 
     rating = property(get_rating, set_rating)
 
     def get_rd(self) -> float:
+        """Return the player's rating deviation."""
         return self.__rd * GLICKO2_SCALER
 
     def set_rd(self, rd: float) -> None:
+        """Set the player's rating deviation."""
         self.__rd = rd / GLICKO2_SCALER
 
     rd = property(get_rd, set_rd)
@@ -59,19 +63,18 @@ class Player:
         vol: float = DEFAULT_VOLATILITY,
         tau: float = TAU,
     ) -> None:
-        # For testing purposes, preload the values
-        # assigned to an unrated player.
+        """Initialize a player."""
+        # For testing purposes, preload the values assigned
+        # to an unrated player.
         self._tau = tau
         self.set_rating(rating)
         self.set_rd(rd)
         self.vol = vol
 
     def _pre_rating_rd(self) -> None:
-        """Calculates and updates the player's rating deviation for the
-        beginning of a rating period.
+        """Calculate a player's new rating deviation for a rating period.
 
         preRatingRD() -> None
-
         """
         self.__rd = math.sqrt(math.pow(self.__rd, 2) + math.pow(self.vol, 2))
 
@@ -81,10 +84,9 @@ class Player:
         rd_list: list[float],
         outcome_list: list[float],
     ) -> None:
-        """Calculates the new rating and rating deviation of the player.
+        """Calculate the new rating and rating deviation of the player.
 
         update_player(list[int], list[int], list[bool]) -> None
-
         """
         # Convert the rating and rating deviation values for internal use.
         rating_list = [
@@ -113,12 +115,11 @@ class Player:
         outcome_list: list[float],
         v: float,
     ) -> float:
-        """Calculating the new volatility as per the Glicko2 system.
+        """Calculate the new volatility as per the Glicko2 system.
 
         Updated for Feb 22, 2012 revision. -Leo
 
         _newVol(list, list, list, float) -> float
-
         """
         # step 1
         a = math.log(self.vol**2)
@@ -160,6 +161,7 @@ class Player:
         return math.exp(_a / 2)
 
     def _f(self, x: float, delta: float, v: float, a: float) -> float:
+        """Return the helper function used during volatility calculation."""
         ex = math.exp(x)
         num1 = ex * (delta**2 - self.__rating**2 - v - ex)
         denom1 = 2 * ((self.__rating**2 + v + ex) ** 2)
@@ -172,10 +174,9 @@ class Player:
         outcome_list: list[float],
         v: float,
     ) -> float:
-        """The delta function of the Glicko2 system.
+        """Compute the delta function of the Glicko2 system.
 
         _delta(list, list, list) -> float
-
         """
         temp_sum = 0.0
         for i in range(len(rating_list)):
@@ -185,10 +186,9 @@ class Player:
         return v * temp_sum
 
     def _v(self, rating_list: list[float], rd_list: list[float]) -> float:
-        """The v function of the Glicko2 system.
+        """Compute the v function of the Glicko2 system.
 
         _v(list[int], list[int]) -> float
-
         """
         temp_sum = 0.0
         for i in range(len(rating_list)):
@@ -197,28 +197,26 @@ class Player:
         return 1 / max(temp_sum, 0.00001)
 
     def _e(self, p2rating: float, p2rd: float) -> float:
-        """The Glicko E function.
+        """Compute the Glicko E function.
 
         _E(int) -> float
-
         """
         return 1 / (
             1 + math.exp(-1 * self._g(p2rd) * (self.__rating - p2rating))
         )
 
     def _g(self, rd: float) -> float:
-        """The Glicko2 g(RD) function.
+        """Compute the Glicko2 g(RD) function.
 
         _g() -> float
-
         """
         return 1 / math.sqrt(1 + 3 * math.pow(rd, 2) / math.pow(math.pi, 2))
 
     def did_not_compete(self) -> None:
-        """Applies Step 6 of the algorithm. Use this for
-        players who did not compete in the rating period.
+        """Apply step 6 of the algorithm.
+
+        Use this for players who did not compete in the rating period.
 
         did_not_compete() -> None
-
         """
         self._pre_rating_rd()

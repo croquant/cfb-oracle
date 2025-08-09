@@ -1,3 +1,5 @@
+"""Constants for the Glicko-2 rating system."""
+
 from core.models.enums import DivisionClassification
 
 # Glicko2 constants
