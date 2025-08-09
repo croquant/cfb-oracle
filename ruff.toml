@@ -1,12 +1,7 @@
 line-length = 80
 indent-width = 4
 
-exclude = [
-    "coverage/",
-    "**/migrations/**",
-    "static/",
-    "templates/",
-]
+exclude = ["coverage/", "**/migrations/**", "static/", "templates/"]
 
 [lint]
 select = [
@@ -33,7 +28,7 @@ unfixable = []
 "config/**" = ["D"]
 "core/management/commands/**" = ["ANN", "D"]
 "core/views/**" = ["ANN", "D"]
-"core/models/**" = ["D"]
+"core/models/**" = ["D"]                     # TODO remove ignore rule from core/models
 "core/admin/**" = ["ANN", "D"]
 "tests/**" = ["ANN", "D"]
 
