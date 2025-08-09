@@ -40,8 +40,8 @@ class Team(models.Model):
     """
 
     school = models.CharField(max_length=200)
-    mascot = models.CharField(max_length=100, null=True, blank=True)
-    abbreviation = models.CharField(max_length=20, null=True, blank=True)
+    mascot = models.CharField(max_length=100, blank=True)
+    abbreviation = models.CharField(max_length=20, blank=True)
     slug = models.SlugField(max_length=50, unique=True)
     conference = models.ForeignKey(
         Conference,
@@ -53,12 +53,11 @@ class Team(models.Model):
     classification = models.CharField(
         max_length=100,
         choices=DivisionClassification.choices,
-        null=True,
         blank=True,
     )
     color = models.CharField(max_length=20)
     alternate_color = models.CharField(max_length=20)
-    twitter = models.CharField(max_length=100, null=True, blank=True)
+    twitter = models.CharField(max_length=100, blank=True)
     location = models.ForeignKey(
         Venue,
         on_delete=models.SET_NULL,
@@ -141,9 +140,9 @@ class TeamLogo(models.Model):
     )
     url = models.URLField()
 
-    def __str__(self):
-        return f"Logo for {self.team.school}: {self.url}"
-
     class Meta:
         verbose_name = "team logo"
         verbose_name_plural = "team logos"
+
+    def __str__(self):
+        return f"Logo for {self.team.school}: {self.url}"

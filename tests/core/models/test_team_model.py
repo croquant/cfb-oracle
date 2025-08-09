@@ -13,7 +13,7 @@ class TeamManagerTests(TestCase):
         school: str,
         logos: List[str],
         alt_names: List[str],
-        mascot: str | None = None,
+        mascot: str | None = "",
     ):
         """Helper to create a team with optional related objects."""
         team = Team.objects.create(

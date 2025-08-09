@@ -21,7 +21,6 @@ class GlickoRating(models.Model):
     classification = models.CharField(
         max_length=20,
         choices=DivisionClassification.choices,
-        null=True,
         blank=True,
         db_index=True,
     )
@@ -57,3 +56,6 @@ class GlickoRating(models.Model):
             )
         ]
         indexes = [models.Index(fields=["team", "season", "week"])]
+
+    def __str__(self):
+        return f"{self.season}-{self.week} {self.team}: {self.rating}"

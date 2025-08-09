@@ -17,5 +17,12 @@
   "python.linting.enabled": true,
   "python.linting.ruffEnabled": true,
   "python.formatting.provider": "black",
-  "djangoCotton.templatePaths": ["templates/cotton"]
+  "djangoCotton.templatePaths": ["templates/cotton"],
+  "python.testing.unittestEnabled": true,
+  "python.envFile": "${workspaceFolder}/.env",
+  "python.testing.unittestArgs": [
+    "--verbosity",
+    "2" // optional; Django forwards this to manage.py test
+  ],
+  "python.testing.autoTestDiscoverOnSaveEnabled": true
 }

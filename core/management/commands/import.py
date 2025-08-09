@@ -60,9 +60,9 @@ class Command(BaseCommand):
                     "name": venue.name,
                     "city": venue.city,
                     "state": venue.state,
-                    "zip_code": venue.zip,
-                    "country_code": venue.country_code,
-                    "timezone": venue.timezone,
+                    "zip_code": venue.zip or "",
+                    "country_code": venue.country_code or "",
+                    "timezone": venue.timezone or "",
                     "latitude": venue.latitude,
                     "longitude": venue.longitude,
                     "elevation": float(venue.elevation)
@@ -95,7 +95,7 @@ class Command(BaseCommand):
                 defaults={
                     "name": conf.name,
                     "short_name": conf.short_name,
-                    "abbreviation": conf.abbreviation,
+                    "abbreviation": conf.abbreviation or "",
                     "classification": conf.classification,
                 },
             )
@@ -149,13 +149,13 @@ class Command(BaseCommand):
                 id=team.id,
                 defaults={
                     "school": team.school,
-                    "mascot": team.mascot,
-                    "abbreviation": team.abbreviation,
+                    "mascot": team.mascot or "",
+                    "abbreviation": team.abbreviation or "",
                     "conference": conference_obj,
-                    "classification": team.classification,
+                    "classification": team.classification or "",
                     "color": team.color,
                     "alternate_color": team.alternate_color,
-                    "twitter": team.twitter,
+                    "twitter": team.twitter or "",
                     "location": (
                         venues_by_id.get(team.location.id)
                         if team.location and team.location.id
@@ -223,7 +223,7 @@ class Command(BaseCommand):
                         "home_classification": (
                             game.home_classification.value
                             if game.home_classification
-                            else None
+                            else ""
                         ),
                         "home_conference": conferences_by_abbrev.get(
                             game.home_conference
@@ -234,7 +234,7 @@ class Command(BaseCommand):
                         "away_classification": (
                             game.away_classification.value
                             if game.away_classification
-                            else None
+                            else ""
                         ),
                         "away_conference": conferences_by_abbrev.get(
                             game.away_conference

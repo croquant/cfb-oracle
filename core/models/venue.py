@@ -9,9 +9,9 @@ class Venue(models.Model):
     name = models.CharField(max_length=200)
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
-    zip_code = models.CharField(max_length=20, null=True, blank=True)
-    country_code = models.CharField(max_length=3, null=True, blank=True)
-    timezone = models.CharField(max_length=50, null=True, blank=True)
+    zip_code = models.CharField(max_length=20, blank=True)
+    country_code = models.CharField(max_length=3, blank=True)
+    timezone = models.CharField(max_length=50, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     elevation = models.FloatField(null=True, blank=True)
@@ -20,10 +20,10 @@ class Venue(models.Model):
     grass = models.BooleanField(null=True, blank=True)
     dome = models.BooleanField(null=True, blank=True)
 
-    def __str__(self):
-        return f"{self.name} ({self.city}, {self.state})"
-
     class Meta:
         ordering = ["name"]
         verbose_name = "venue"
         verbose_name_plural = "venues"
+
+    def __str__(self):
+        return f"{self.name} ({self.city}, {self.state})"

@@ -40,7 +40,6 @@ class Match(models.Model):
     home_classification = models.CharField(
         max_length=20,
         choices=DivisionClassification.choices,
-        null=True,
         blank=True,
     )
     home_conference = models.ForeignKey(
@@ -58,7 +57,6 @@ class Match(models.Model):
     away_classification = models.CharField(
         max_length=20,
         choices=DivisionClassification.choices,
-        null=True,
         blank=True,
     )
     away_conference = models.ForeignKey(

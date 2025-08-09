@@ -8,13 +8,12 @@ class Conference(models.Model):
     """Represents an athletic conference."""
 
     name = models.CharField(max_length=200)
-    short_name = models.CharField(max_length=100, null=True, blank=True)
-    abbreviation = models.CharField(max_length=20, null=True, blank=True)
+    short_name = models.CharField(max_length=100, blank=True)
+    abbreviation = models.CharField(max_length=20, blank=True)
     slug = models.SlugField(max_length=50, unique=True)
     classification = models.CharField(
         max_length=10,
         choices=DivisionClassification.choices,
-        null=True,
         blank=True,
     )
 
