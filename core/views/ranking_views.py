@@ -1,9 +1,13 @@
+import logging
+
 from django.core.cache import cache
 from django.http import Http404
 from django.views.generic import ListView
 
 from core.models.enums import DivisionClassification
 from core.models.glicko import GlickoRating
+
+logger = logging.getLogger(__name__)
 
 
 class RankingListView(ListView):
@@ -40,7 +44,7 @@ class RankingListView(ListView):
             seasons.sort()
             cache.set(seasons_key, seasons, 3600)
         else:
-            print(f"Cache hit for seasons: {seasons_key}")
+            logger.debug("Cache hit for seasons: %s", seasons_key)
         latest_season = seasons[-1] if seasons else None
         season = self.request.GET.get("season")
         season = (
@@ -64,7 +68,7 @@ class RankingListView(ListView):
             weeks.sort()
             cache.set(weeks_key, weeks, 3600)
         else:
-            print(f"Cache hit for weeks: {weeks_key}")
+            logger.debug("Cache hit for weeks: %s", weeks_key)
         latest_week = weeks[-1] if weeks else None
         week = self.request.GET.get("week")
         week = (
