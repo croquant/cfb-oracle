@@ -29,7 +29,7 @@ select = [
     "D",
     "TD",
 ]
-ignore = ["D203", "D213"]
+ignore = ["D203", "D212"]
 fixable = ["ALL"]
 unfixable = []
 

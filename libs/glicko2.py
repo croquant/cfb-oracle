@@ -1,4 +1,5 @@
-"""Glicko-2 rating system implementation.
+"""
+Glicko-2 rating system implementation.
 
 Copyright (c) 2009 Ryan Kirkman
 
@@ -72,7 +73,8 @@ class Player:
         self.vol = vol
 
     def _pre_rating_rd(self) -> None:
-        """Calculate a player's new rating deviation for a rating period.
+        """
+        Calculate a player's new rating deviation for a rating period.
 
         preRatingRD() -> None
         """
@@ -84,7 +86,8 @@ class Player:
         rd_list: list[float],
         outcome_list: list[float],
     ) -> None:
-        """Calculate the new rating and rating deviation of the player.
+        """
+        Calculate the new rating and rating deviation of the player.
 
         update_player(list[int], list[int], list[bool]) -> None
         """
@@ -115,7 +118,8 @@ class Player:
         outcome_list: list[float],
         v: float,
     ) -> float:
-        """Calculate the new volatility as per the Glicko2 system.
+        """
+        Calculate the new volatility as per the Glicko2 system.
 
         Updated for Feb 22, 2012 revision. -Leo
 
@@ -174,7 +178,8 @@ class Player:
         outcome_list: list[float],
         v: float,
     ) -> float:
-        """Compute the delta function of the Glicko2 system.
+        """
+        Compute the delta function of the Glicko2 system.
 
         _delta(list, list, list) -> float
         """
@@ -186,7 +191,8 @@ class Player:
         return v * temp_sum
 
     def _v(self, rating_list: list[float], rd_list: list[float]) -> float:
-        """Compute the v function of the Glicko2 system.
+        """
+        Compute the v function of the Glicko2 system.
 
         _v(list[int], list[int]) -> float
         """
@@ -197,7 +203,8 @@ class Player:
         return 1 / max(temp_sum, 0.00001)
 
     def _e(self, p2rating: float, p2rd: float) -> float:
-        """Compute the Glicko E function.
+        """
+        Compute the Glicko E function.
 
         _E(int) -> float
         """
@@ -206,14 +213,16 @@ class Player:
         )
 
     def _g(self, rd: float) -> float:
-        """Compute the Glicko2 g(RD) function.
+        """
+        Compute the Glicko2 g(RD) function.
 
         _g() -> float
         """
         return 1 / math.sqrt(1 + 3 * math.pow(rd, 2) / math.pow(math.pi, 2))
 
     def did_not_compete(self) -> None:
-        """Apply step 6 of the algorithm.
+        """
+        Apply step 6 of the algorithm.
 
         Use this for players who did not compete in the rating period.
 
