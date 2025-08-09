@@ -39,10 +39,6 @@ unfixable = []
 "core/views/**" = ["ANN", "D"]
 "core/models/**" = ["ANN", "D"]
 "core/admin/**" = ["ANN", "D"]
-"core/**" = [
-    "ANN",
-    "D",
-] # TODO: remove this line from the lint.per-file-ignores and fix all warnings
 "tests/**" = ["ANN", "D"]
 
 
