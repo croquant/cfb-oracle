@@ -9,10 +9,8 @@ coverage run manage.py test
 coverage json
 coverage report
 
-# Extract the overall coverage percentage (integer) from the “TOTAL” line
-TOTAL=$(
-  coverage report --format=total
-)
+# Extract the overall coverage percentage (can be a decimal)
+TOTAL=$(coverage report --format=total)
 
 echo "Total coverage: ${TOTAL}%"
 
@@ -27,10 +25,10 @@ fi
 PREV_TOTAL=$(< "${COVERAGE_FILE}")
 
 # Compare and act
-if (( TOTAL < PREV_TOTAL )); then
+if awk -v a="$TOTAL" -v b="$PREV_TOTAL" 'BEGIN{exit (a+0 < b+0)?0:1}'; then
   echo "Error: Coverage decreased from ${PREV_TOTAL}% to ${TOTAL}%!" >&2
   exit 1
 else
-  printf '%d\n' "${TOTAL}" > "${COVERAGE_FILE}"
+  printf '%s\n' "${TOTAL}" > "${COVERAGE_FILE}"
   echo "Coverage did not decrease."
 fi

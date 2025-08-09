@@ -17,6 +17,7 @@ omit =
 show_missing = true
 skip_covered = true
 skip_empty = true
+precision = 2
 
 [json]
 output = coverage/coverage.json
