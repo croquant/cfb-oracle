@@ -2,14 +2,10 @@ line-length = 80
 indent-width = 4
 
 exclude = [
-    ".git",
-    ".mypy_cache",
-    ".pytest_cache",
-    ".ruff_cache",
-    ".venv",
-    "venv",
     "coverage/",
-    "core/migrations/",
+    "**/migrations/**",
+    "static/",
+    "templates/",
 ]
 
 [lint]
