@@ -1,5 +1,3 @@
-from typing import List
-
 from django.db import connection
 from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
@@ -11,8 +9,8 @@ class TeamManagerTests(TestCase):
     def _create_team(
         self,
         school: str,
-        logos: List[str],
-        alt_names: List[str],
+        logos: list[str],
+        alt_names: list[str],
         mascot: str | None = "",
     ):
         """Helper to create a team with optional related objects."""
