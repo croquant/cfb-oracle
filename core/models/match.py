@@ -10,9 +10,10 @@ class Match(models.Model):
     """
     Represents a football match between two teams.
 
-    The 'completed_requires_scores' constraint ensures that if a match is marked as completed,
-    both home_score and away_score must be provided (not null). If the match is not completed,
-    scores may be null.
+    The 'completed_requires_scores' constraint ensures that if a match is
+    marked as completed, both ``home_score`` and ``away_score`` must be
+    provided (not null). If the match is not completed, scores may be
+    null.
     """
 
     season = models.PositiveIntegerField()
@@ -24,7 +25,11 @@ class Match(models.Model):
     start_date = models.DateTimeField()
     completed = models.BooleanField(default=False)
     venue = models.ForeignKey(
-        Venue, on_delete=models.SET_NULL, null=True, blank=True, related_name="matches"
+        Venue,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="matches",
     )
     neutral_site = models.BooleanField(default=False)
     attendance = models.PositiveIntegerField(blank=True, null=True)

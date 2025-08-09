@@ -10,12 +10,12 @@ from cfbd.rest import ApiException
 from django.core.management.base import CommandError
 from django.test import TestCase
 from django.utils import timezone
-
-Command = import_module("core.management.commands.import").Command
 from core.models.conference import Conference
 from core.models.match import Match
 from core.models.team import Team
 from core.models.venue import Venue
+
+Command = import_module("core.management.commands.import").Command
 
 
 class ImportCommandTests(TestCase):
@@ -142,7 +142,7 @@ class ImportCommandTests(TestCase):
         self.assertEqual(venue.capacity, 56000)
 
     def test_import_conferences(self):
-        """``import_conferences`` creates and updates :class:`Conference` records."""
+        """``import_conferences`` creates and updates Conference records."""
         conferences = [self._sample_conference()]
         api = self._ns(get_conferences=lambda: conferences)
         self.command.import_conferences(api)
@@ -157,7 +157,7 @@ class ImportCommandTests(TestCase):
         self.assertEqual(conf.name, "ACC Updated")
 
     def test_import_teams(self):
-        """``import_teams`` creates teams and related records and updates them."""
+        """``import_teams`` creates and updates teams and related records."""
         self._import_prerequisites()
         teams = self._import_sample_teams()
 
@@ -178,7 +178,9 @@ class ImportCommandTests(TestCase):
 
         # Update team color and ensure related objects aren't duplicated
         teams[0].color = "#FF0000"
-        api_updated = self._ns(get_teams=lambda conference=None, year=None: [teams[0]])
+        api_updated = self._ns(
+            get_teams=lambda conference=None, year=None: [teams[0]]
+        )
         self.command.import_teams(api_updated)
         t1.refresh_from_db()
         self.assertEqual(t1.color, "#FF0000")
@@ -297,7 +299,9 @@ class ImportCommandTests(TestCase):
 
         self.command.import_venues.assert_called_once()
         self.command.import_conferences.assert_not_called()
-        self.assertIn("Exception when calling CFBD API", self.command.stderr.getvalue())
+        self.assertIn(
+            "Exception when calling CFBD API", self.command.stderr.getvalue()
+        )
         self.assertIn("Total import completed", self.command.stdout.getvalue())
 
     @patch("core.management.commands.import.cfbd.ApiClient")

@@ -1,13 +1,12 @@
 import os
 import math
 import django
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-django.setup()
-
 from django.test import TestCase
 from libs.glicko2 import Player
 from libs.constants import GLICKO2_SCALER
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+django.setup()
 
 
 class Glicko2Test(TestCase):
@@ -34,7 +33,9 @@ class Glicko2Test(TestCase):
         p._pre_rating_rd()
 
         # RD grows by volatility before being rescaled
-        expected_rd = math.sqrt((200 / GLICKO2_SCALER) ** 2 + 0.06**2) * GLICKO2_SCALER
+        expected_rd = (
+            math.sqrt((200 / GLICKO2_SCALER) ** 2 + 0.06**2) * GLICKO2_SCALER
+        )
         self.assertAlmostEqual(p.rd, expected_rd, places=12)
 
     def test_new_vol(self):
@@ -85,7 +86,9 @@ class Glicko2Test(TestCase):
 
         p = LoopPlayer(rating=1500, rd=200, vol=0.06, tau=0.5)
         v = p._v(self.scaled_ratings, self.scaled_rds)
-        new_vol = p._new_vol(self.scaled_ratings, self.scaled_rds, self.outcome_list, v)
+        new_vol = p._new_vol(
+            self.scaled_ratings, self.scaled_rds, self.outcome_list, v
+        )
 
         # Forcing the loop still converges to the known post-match volatility.
         self.assertAlmostEqual(new_vol, 0.05999342315486217, places=9)
@@ -109,5 +112,7 @@ class Glicko2Test(TestCase):
         p.did_not_compete()
 
         # Rating deviation grows identically to ``_pre_rating_rd``.
-        expected_rd = math.sqrt((50 / GLICKO2_SCALER) ** 2 + 0.06**2) * GLICKO2_SCALER
+        expected_rd = (
+            math.sqrt((50 / GLICKO2_SCALER) ** 2 + 0.06**2) * GLICKO2_SCALER
+        )
         self.assertAlmostEqual(p.rd, expected_rd, places=12)

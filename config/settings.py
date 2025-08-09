@@ -97,16 +97,28 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "UserAttributeSimilarityValidator"
+        ),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "MinimumLengthValidator"
+        ),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "CommonPasswordValidator"
+        ),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "NumericPasswordValidator"
+        ),
     },
 ]
 
@@ -199,17 +211,23 @@ UNFOLD = {
                     {
                         "title": "Teams",
                         "icon": "groups",
-                        "link": lambda request: reverse("admin:core_team_changelist"),
+                        "link": lambda request: reverse(
+                            "admin:core_team_changelist"
+                        ),
                     },
                     {
                         "title": "Venues",
                         "icon": "stadium",
-                        "link": lambda request: reverse("admin:core_venue_changelist"),
+                        "link": lambda request: reverse(
+                            "admin:core_venue_changelist"
+                        ),
                     },
                     {
                         "title": "Matches",
                         "icon": "scoreboard",
-                        "link": lambda request: reverse("admin:core_match_changelist"),
+                        "link": lambda request: reverse(
+                            "admin:core_match_changelist"
+                        ),
                     },
                 ],
             },
@@ -221,12 +239,16 @@ UNFOLD = {
                     {
                         "title": "Users",
                         "icon": "person",
-                        "link": lambda request: reverse("admin:auth_user_changelist"),
+                        "link": lambda request: reverse(
+                            "admin:auth_user_changelist"
+                        ),
                     },
                     {
                         "title": "Groups",
                         "icon": "group_work",
-                        "link": lambda request: reverse("admin:auth_group_changelist"),
+                        "link": lambda request: reverse(
+                            "admin:auth_group_changelist"
+                        ),
                     },
                 ],
             },

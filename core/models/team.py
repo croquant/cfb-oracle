@@ -80,7 +80,11 @@ class Team(models.Model):
         return f"{self.school}{mascot}"
 
     def save(self, *args, **kwargs):
-        if not self.slug or self.slug == "" or slugify(self.school) not in self.slug:
+        if (
+            not self.slug
+            or self.slug == ""
+            or slugify(self.school) not in self.slug
+        ):
             base_slug = slugify(self.school)
             slug = base_slug
             counter = 1
@@ -128,11 +132,13 @@ class TeamAlternativeName(models.Model):
 
 
 class TeamLogo(models.Model):
-    """
-    Stores logo URLs for a team.
-    """
+    """Stores logo URLs for a team."""
 
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="logos")
+    team = models.ForeignKey(
+        Team,
+        on_delete=models.CASCADE,
+        related_name="logos",
+    )
     url = models.URLField()
 
     def __str__(self):
