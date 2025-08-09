@@ -2,7 +2,7 @@ import io
 from argparse import ArgumentParser
 from datetime import date, datetime
 from importlib import import_module
-from types import SimpleNamespace as NS
+from types import SimpleNamespace as Namespace
 from unittest.mock import MagicMock, patch
 
 import cfbd
@@ -16,7 +16,7 @@ from core.models.match import Match
 from core.models.team import Team
 from core.models.venue import Venue
 
-Command = import_module("core.management.commands.import").Command
+Command = import_module("core.management.commands.cfbd_import").Command
 
 
 class ImportCommandTests(TestCase):
@@ -29,7 +29,7 @@ class ImportCommandTests(TestCase):
 
     def _ns(self, **kwargs):
         """Shorthand for creating simple namespaces."""
-        return NS(**kwargs)
+        return Namespace(**kwargs)
 
     def _sample_venue(self, capacity: int = 55000):
         return self._ns(
@@ -264,7 +264,7 @@ class ImportCommandTests(TestCase):
         self.assertEqual(m1.home_score, 30)
         self.assertEqual(m1.away_score, 20)
 
-    @patch("core.management.commands.import.load_dotenv")
+    @patch("core.management.commands.cfbd_import.load_dotenv")
     def test_handle_requires_api_key(self, mock_load_dotenv):
         """``handle`` raises :class:`CommandError` when API key is missing."""
         with patch.dict("os.environ", {}, clear=True):
@@ -276,11 +276,11 @@ class ImportCommandTests(TestCase):
                     end_year=2023,
                 )
 
-    @patch("core.management.commands.import.cfbd.ApiClient")
-    @patch("core.management.commands.import.cfbd.GamesApi")
-    @patch("core.management.commands.import.cfbd.TeamsApi")
-    @patch("core.management.commands.import.cfbd.ConferencesApi")
-    @patch("core.management.commands.import.cfbd.VenuesApi")
+    @patch("core.management.commands.cfbd_import.cfbd.ApiClient")
+    @patch("core.management.commands.cfbd_import.cfbd.GamesApi")
+    @patch("core.management.commands.cfbd_import.cfbd.TeamsApi")
+    @patch("core.management.commands.cfbd_import.cfbd.ConferencesApi")
+    @patch("core.management.commands.cfbd_import.cfbd.VenuesApi")
     def test_handle_api_exception(
         self, mock_venues, mock_confs, mock_teams, mock_games, mock_client
     ):
@@ -305,11 +305,11 @@ class ImportCommandTests(TestCase):
         )
         self.assertIn("Total import completed", self.command.stdout.getvalue())
 
-    @patch("core.management.commands.import.cfbd.ApiClient")
-    @patch("core.management.commands.import.cfbd.GamesApi")
-    @patch("core.management.commands.import.cfbd.TeamsApi")
-    @patch("core.management.commands.import.cfbd.ConferencesApi")
-    @patch("core.management.commands.import.cfbd.VenuesApi")
+    @patch("core.management.commands.cfbd_import.cfbd.ApiClient")
+    @patch("core.management.commands.cfbd_import.cfbd.GamesApi")
+    @patch("core.management.commands.cfbd_import.cfbd.TeamsApi")
+    @patch("core.management.commands.cfbd_import.cfbd.ConferencesApi")
+    @patch("core.management.commands.cfbd_import.cfbd.VenuesApi")
     def test_handle_success(
         self, mock_venues, mock_confs, mock_teams, mock_games, mock_client
     ):
