@@ -22,7 +22,9 @@ class ConferenceModelTests(TestCase):
 
     def test_save_preserves_valid_slug(self):
         """A slug containing the slugified name remains unchanged on save."""
-        conf = Conference.objects.create(name="Mountain West", slug="mountain-west-custom")
+        conf = Conference.objects.create(
+            name="Mountain West", slug="mountain-west-custom"
+        )
         original_slug = conf.slug
         conf.save()
         self.assertEqual(conf.slug, original_slug)

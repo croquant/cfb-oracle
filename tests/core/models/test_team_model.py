@@ -79,7 +79,9 @@ class TeamManagerTests(TestCase):
         # Using the explicit manager method should keep query count constant
         with CaptureQueriesContext(connection) as ctx:
             teams = list(
-                Team.objects.with_related().filter(school__icontains="With Related")
+                Team.objects.with_related().filter(
+                    school__icontains="With Related"
+                )
             )
             for team in teams:
                 team.logo_bright
@@ -90,9 +92,7 @@ class TeamManagerTests(TestCase):
 
     def test_team_str_with_mascot(self):
         """``__str__`` should include the mascot when present."""
-        team = self._create_team(
-            "Georgia", [], [], mascot="Bulldogs"
-        )
+        team = self._create_team("Georgia", [], [], mascot="Bulldogs")
         self.assertEqual(str(team), "Georgia Bulldogs")
 
     def test_team_str_without_mascot(self):

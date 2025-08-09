@@ -21,7 +21,10 @@ class RankingListView(ListView):
 
     def get_classification(self):
         classification = self.kwargs.get("classification")
-        if classification and classification not in DivisionClassification.values:
+        if (
+            classification
+            and classification not in DivisionClassification.values
+        ):
             raise Http404
         return classification
 
@@ -51,9 +54,13 @@ class RankingListView(ListView):
         weeks = cache.get(weeks_key)
         if weeks is None:
             weeks_qs = (
-                queryset.filter(season=season) if season is not None else queryset
+                queryset.filter(season=season)
+                if season is not None
+                else queryset
             )
-            weeks = list(weeks_qs.order_by().values_list("week", flat=True).distinct())
+            weeks = list(
+                weeks_qs.order_by().values_list("week", flat=True).distinct()
+            )
             weeks.sort()
             cache.set(weeks_key, weeks, 3600)
         else:
@@ -61,7 +68,9 @@ class RankingListView(ListView):
         latest_week = weeks[-1] if weeks else None
         week = self.request.GET.get("week")
         week = (
-            int(week) if week and week.isdigit() and int(week) in weeks else latest_week
+            int(week)
+            if week and week.isdigit() and int(week) in weeks
+            else latest_week
         )
 
         return season, week, seasons, weeks
@@ -73,7 +82,12 @@ class RankingListView(ListView):
         if classification:
             qs = qs.filter(classification=classification)
 
-        self.season, self.week, self.seasons, self.weeks = self.get_season_and_week(qs)
+        (
+            self.season,
+            self.week,
+            self.seasons,
+            self.weeks,
+        ) = self.get_season_and_week(qs)
         # Filter by chosen season and week
         if self.season is not None:
             qs = qs.filter(season=self.season)
@@ -92,10 +106,14 @@ class RankingListView(ListView):
         weeks = getattr(self, "weeks", [])
 
         classification_label = (
-            DivisionClassification(classification).label if classification else None
+            DivisionClassification(classification).label
+            if classification
+            else None
         )
         title = (
-            f"{classification_label} Rankings" if classification_label else "Rankings"
+            f"{classification_label} Rankings"
+            if classification_label
+            else "Rankings"
         )
 
         context.update(

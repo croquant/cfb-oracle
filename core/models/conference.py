@@ -27,7 +27,11 @@ class Conference(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        if not self.slug or self.slug == "" or slugify(self.name) not in self.slug:
+        if (
+            not self.slug
+            or self.slug == ""
+            or slugify(self.name) not in self.slug
+        ):
             base_slug = slugify(self.name)
             slug = base_slug
             counter = 1

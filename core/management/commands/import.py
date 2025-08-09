@@ -19,12 +19,17 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--conference", type=str, help="Optional conference abbreviation filter"
+            "--conference",
+            type=str,
+            help="Optional conference abbreviation filter",
         )
         parser.add_argument(
             "--year",
             type=int,
-            help="Optional year filter to get historical conference affiliations",
+            help=(
+                "Optional year filter to get historical "
+                "conference affiliations"
+            ),
         )
         parser.add_argument(
             "--start-year",
@@ -61,7 +66,9 @@ class Command(BaseCommand):
                     "timezone": venue.timezone,
                     "latitude": venue.latitude,
                     "longitude": venue.longitude,
-                    "elevation": float(venue.elevation) if venue.elevation else None,
+                    "elevation": float(venue.elevation)
+                    if venue.elevation
+                    else None,
                     "capacity": venue.capacity,
                     "construction_year": venue.construction_year,
                     "grass": venue.grass,
@@ -69,7 +76,8 @@ class Command(BaseCommand):
                 },
             )
             self.stdout.write(
-                f"Venue {venue.name} ({venue.city}, {venue.state}) imported/updated successfully."
+                f"Venue {venue.name} ({venue.city}, {venue.state}) "
+                "imported/updated successfully."
             )
 
     def import_conferences(self, api_instance):
@@ -92,19 +100,26 @@ class Command(BaseCommand):
                     "classification": conf.classification,
                 },
             )
-            self.stdout.write(f"Conference {conf.name} imported/updated successfully.")
+            self.stdout.write(
+                f"Conference {conf.name} imported/updated successfully."
+            )
 
     def import_teams(self, api_instance, *, conference=None, year=None):
         """Fetch team data and related records from CFBD.
 
         Steps:
-        1. Call :func:`TeamsApi.get_teams` with optional ``conference`` and ``year``.
-        2. Create or update :class:`Team` instances including venue and conference links.
-        3. Store associated :class:`TeamLogo` and :class:`TeamAlternativeName` records.
+        1. Call :func:`TeamsApi.get_teams` with optional ``conference`` and
+           ``year``.
+        2. Create or update :class:`Team` instances, including venue and
+           conference links.
+        3. Store associated :class:`TeamLogo` and
+           :class:`TeamAlternativeName` records.
         4. Output a status line for every processed team.
         """
 
-        teams_response = api_instance.get_teams(conference=conference, year=year)
+        teams_response = api_instance.get_teams(
+            conference=conference, year=year
+        )
 
         # Preload related objects so we do not hit the database for every team
         # iteration. ``in_bulk`` performs a single query returning a dictionary
@@ -115,7 +130,9 @@ class Command(BaseCommand):
         conferences_by_abbrev = {
             c.abbreviation: c for c in conferences.values() if c.abbreviation
         }
-        conferences_by_name = {c.name: c for c in conferences.values() if c.name}
+        conferences_by_name = {
+            c.name: c for c in conferences.values() if c.name
+        }
 
         # ``in_bulk`` without ``field_name`` defaults to the primary key, which
         # is already unique for venues. We can therefore use the returned
@@ -158,16 +175,18 @@ class Command(BaseCommand):
                     name=alt_name,
                 )
             self.stdout.write(
-                f"Team {team.school} ({team.abbreviation}) imported/updated successfully."
+                f"Team {team.school} ({team.abbreviation}) "
+                "imported/updated successfully."
             )
 
     def import_games(self, api_instance, *, start_year, end_year):
         """Fetch game data and store it using the :class:`Match` model.
 
         Steps:
-        1. Loop over the supplied year range and call :func:`GamesApi.get_games`.
-        2. ``update_or_create`` each :class:`Match` instance linking teams, venues,
-           and conferences where possible.
+        1. Loop over the supplied year range and call
+           :func:`GamesApi.get_games`.
+        2. ``update_or_create`` each :class:`Match` instance linking teams,
+           venues, and conferences where possible.
         3. Output a status line for every processed game.
         """
 
@@ -178,7 +197,9 @@ class Command(BaseCommand):
         conferences_by_abbrev = {
             c.abbreviation: c for c in conferences.values() if c.abbreviation
         }
-        conferences_by_name = {c.name: c for c in conferences.values() if c.name}
+        conferences_by_name = {
+            c.name: c for c in conferences.values() if c.name
+        }
 
         for season in range(start_year, end_year + 1):
             games_response = api_instance.get_games(
@@ -224,7 +245,8 @@ class Command(BaseCommand):
                     },
                 )
                 self.stdout.write(
-                    f"Match {game.home_team} vs {game.away_team} ({season}) imported/updated successfully."
+                    f"Match {game.home_team} vs {game.away_team} ({season}) "
+                    "imported/updated successfully."
                 )
 
     def handle(self, *args, **options):
@@ -246,13 +268,15 @@ class Command(BaseCommand):
                 step_start = time.perf_counter()
                 self.import_venues(venues_api_instance)
                 self.stdout.write(
-                    f"Venues import completed in {time.perf_counter() - step_start:.2f} seconds"
+                    f"Venues import completed in "
+                    f"{time.perf_counter() - step_start:.2f} seconds"
                 )
 
                 step_start = time.perf_counter()
                 self.import_conferences(conferences_api_instance)
                 self.stdout.write(
-                    f"Conferences import completed in {time.perf_counter() - step_start:.2f} seconds"
+                    f"Conferences import completed in "
+                    f"{time.perf_counter() - step_start:.2f} seconds"
                 )
 
                 step_start = time.perf_counter()
@@ -262,7 +286,8 @@ class Command(BaseCommand):
                     year=options.get("year"),
                 )
                 self.stdout.write(
-                    f"Teams import completed in {time.perf_counter() - step_start:.2f} seconds"
+                    f"Teams import completed in "
+                    f"{time.perf_counter() - step_start:.2f} seconds"
                 )
 
                 step_start = time.perf_counter()
@@ -272,7 +297,8 @@ class Command(BaseCommand):
                     end_year=options.get("end_year"),
                 )
                 self.stdout.write(
-                    f"Games import completed in {time.perf_counter() - step_start:.2f} seconds"
+                    f"Games import completed in "
+                    f"{time.perf_counter() - step_start:.2f} seconds"
                 )
             except ApiException as e:
                 self.stderr.write(f"Exception when calling CFBD API: {e}\n")

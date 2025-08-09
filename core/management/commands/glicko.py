@@ -98,7 +98,9 @@ class Command(BaseCommand):
             .distinct()
         )
         self.stdout.write(
-            f"Processing season {season}... {matches_qs.count()} matches found across {len(weeks)} weeks."
+            f"Processing season {season}... "
+            f"{matches_qs.count()} matches found across "
+            f"{len(weeks)} weeks."
         )
 
         season_active_teams: set[int] = set()
@@ -106,7 +108,8 @@ class Command(BaseCommand):
         for week in weeks:
             week_matches = matches_qs.filter(week=week).order_by("start_date")
             self.stdout.write(
-                f"  Processing week {week}... {week_matches.count()} matches found."
+                f"  Processing week {week}... "
+                f"{week_matches.count()} matches found."
             )
             self._process_week(
                 season,

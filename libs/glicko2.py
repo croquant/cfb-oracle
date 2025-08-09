@@ -82,7 +82,9 @@ class Player:
 
         """
         # Convert the rating and rating deviation values for internal use.
-        rating_list = [(x - DEFAULT_RATING) / GLICKO2_SCALER for x in rating_list]
+        rating_list = [
+            (x - DEFAULT_RATING) / GLICKO2_SCALER for x in rating_list
+        ]
         rd_list = [x / GLICKO2_SCALER for x in rd_list]
 
         v = self._v(rating_list, rd_list)
@@ -183,7 +185,10 @@ class Player:
         _E(int) -> float
 
         """
-        return 1 / (1 + math.exp(-1 * self._g(p2rd) * (self.__rating - p2rating)))
+        return 1 / (
+            1
+            + math.exp(-1 * self._g(p2rd) * (self.__rating - p2rating))
+        )
 
     def _g(self, rd):
         """The Glicko2 g(RD) function.
