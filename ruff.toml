@@ -1,7 +1,7 @@
 line-length = 80
 indent-width = 4
 
-exclude = ["coverage/", "**/migrations/**", "static/", "templates/"]
+exclude = [".git", "coverage/", "**/migrations/**", "static/", "templates/"]
 
 [lint]
 select = [
