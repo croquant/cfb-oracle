@@ -1,18 +1,34 @@
 > **_NOTE:_** These instructions are meant to be read by AI agents
 
-## Testing & Coverage
+## Project Overview
+- Django 5 application for ranking and predicting college football games.
+- `core/` holds the main app:
+  - models for teams, matches, venues, conferences, and Glicko ratings.
+  - management commands like `import` (ingest data) and `glicko` (calculate ratings).
+  - views, admin customizations, and URLs.
+- `libs/` contains shared utilities such as a Glicko-2 rating implementation and constants.
+- `templates/` stores Django templates (base layout, ranking table, etc.).
+- Tests reside in `tests/` mirroring the app structure.
 
+## Development
+- Python dependencies are in `requirements.txt`.
+- Use `.env.example` as a reference for required environment variables.
+- Linting and formatting are enforced by **Ruff** (`ruff.toml`).
+- `pre-commit` runs Ruff, Django system checks, migration checks, and the test suite.
+
+## Testing & Coverage
 - Always use `./test.sh` to run tests and check code coverage.
 - The coverage report is generated at `coverage/coverage.json`.
 - Review the coverage report to ensure your changes maintain or improve test coverage.
-- For details on coverage tracking and pre-commit hooks, see the notes below.
 
 ## Pre-commit & Coverage Notes
+`pre-commit` enforces formatting, linting, and coverage tracking.
 
-- If a **pre-commit** hook modifies `.coverage_total`, you **must add it to the commit** before retrying:
-  ```bash
-  git add .coverage_total
-  git commit -m "<your message>"
-  ```
-  If the commit was aborted with "files were modified by this hook", staging the file and re-running the commit is enough.
-- Do **not** skip hooks; only use `--no-verify` in emergencies. The goal is to keep the tracked coverage summary in sync with the code.
+1. Run `pre-commit run --files <paths>` or `git commit` to trigger the hooks.
+2. If the hooks update `.coverage_total`, stage and commit that file:
+   ```bash
+   git add .coverage_total
+   git commit -m "<your message>"
+   ```
+3. When `ruff format` or `ruff --fix` rewrites files, stage the changes and rerun `pre-commit` until it passes.
+4. Avoid `--no-verify` except in emergencies so coverage remains in sync with the code.
