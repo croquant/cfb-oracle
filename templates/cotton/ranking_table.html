@@ -46,6 +46,10 @@
                     <td>{{ rating.rating | floatformat:0 }}</td>
                     <td>{{ rating.rating_change | floatformat:0 }}</td>
                 </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No rankings available</td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>
