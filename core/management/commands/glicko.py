@@ -25,7 +25,7 @@ class Command(BaseCommand):
 
     help = "Calculate Glicko ratings for each team in each week"
 
-    def handle(self, *args, **options):
+    def handle(self, *args: str, **options: int | str | None) -> None:
         """Run the Glicko rating calculation."""
         self.stdout.write("Clearing existing ratings...")
         GlickoRating.objects.all().delete()
@@ -57,7 +57,9 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
     @staticmethod
     def _get_player(
-        players: dict[int, Player], team_id: int, division
+        players: dict[int, Player],
+        team_id: int,
+        division: Optional[DivisionClassification],
     ) -> Player:
         """Retrieve or create a :class:`Player` for the given team."""
         player = players.get(team_id)
@@ -163,7 +165,7 @@ class Command(BaseCommand):
 
     def _process_match(
         self,
-        match,
+        match: Match,
         players: dict[int, Player],
         home_field_bonus: float,
         results: dict[int, list[tuple[float, float, float, float]]],

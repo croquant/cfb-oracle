@@ -1,3 +1,6 @@
+"""Management command to import data from the CFBD API."""
+
+import argparse
 import os
 import time
 from datetime import date
@@ -15,9 +18,12 @@ from core.models.venue import Venue
 
 
 class Command(BaseCommand):
+    """Import data from the CFBD API."""
+
     help = "Imports data from CFBD API"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+        """Add command-line arguments."""
         parser.add_argument(
             "--conference",
             type=str,
@@ -43,15 +49,15 @@ class Command(BaseCommand):
             help="Last season year to import games from",
         )
 
-    def import_venues(self, api_instance):
-        """Fetch venue data from CFBD and store it in the database.
+    def import_venues(self, api_instance: cfbd.VenuesApi) -> None:
+        """
+        Fetch venue data from CFBD and store it in the database.
 
         Steps:
         1. Call :func:`VenuesApi.get_venues` to retrieve all venues.
         2. Loop over the response and ``update_or_create`` each :class:`Venue`.
         3. Output a status line for every processed venue.
         """
-
         venues_response = api_instance.get_venues()
         for venue in venues_response:
             Venue.objects.update_or_create(
@@ -79,15 +85,15 @@ class Command(BaseCommand):
                 "imported/updated successfully."
             )
 
-    def import_conferences(self, api_instance):
-        """Fetch conference information and save it to the database.
+    def import_conferences(self, api_instance: cfbd.ConferencesApi) -> None:
+        """
+        Fetch conference information and save it to the database.
 
         Steps:
         1. Retrieve conferences using :func:`ConferencesApi.get_conferences`.
         2. ``update_or_create`` each :class:`Conference` object.
         3. Output a status message for every processed conference.
         """
-
         conferences_response = api_instance.get_conferences()
         for conf in conferences_response:
             Conference.objects.update_or_create(
@@ -103,8 +109,15 @@ class Command(BaseCommand):
                 f"Conference {conf.name} imported/updated successfully."
             )
 
-    def import_teams(self, api_instance, *, conference=None, year=None):
-        """Fetch team data and related records from CFBD.
+    def import_teams(
+        self,
+        api_instance: cfbd.TeamsApi,
+        *,
+        conference: str | None = None,
+        year: int | None = None,
+    ) -> None:
+        """
+        Fetch team data and related records from CFBD.
 
         Steps:
         1. Call :func:`TeamsApi.get_teams` with optional ``conference`` and
@@ -115,7 +128,6 @@ class Command(BaseCommand):
            :class:`TeamAlternativeName` records.
         4. Output a status line for every processed team.
         """
-
         teams_response = api_instance.get_teams(
             conference=conference, year=year
         )
@@ -178,8 +190,15 @@ class Command(BaseCommand):
                 "imported/updated successfully."
             )
 
-    def import_games(self, api_instance, *, start_year, end_year):
-        """Fetch game data and store it using the :class:`Match` model.
+    def import_games(
+        self,
+        api_instance: cfbd.GamesApi,
+        *,
+        start_year: int,
+        end_year: int,
+    ) -> None:
+        """
+        Fetch game data and store it using the :class:`Match` model.
 
         Steps:
         1. Loop over the supplied year range and call
@@ -188,7 +207,6 @@ class Command(BaseCommand):
            venues, and conferences where possible.
         3. Output a status line for every processed game.
         """
-
         # Preload related objects for efficient lookup during import
         teams_by_id = Team.objects.in_bulk()
         venues_by_id = Venue.objects.in_bulk()
@@ -248,7 +266,8 @@ class Command(BaseCommand):
                     "imported/updated successfully."
                 )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: str, **options: int | str | None) -> None:
+        """Execute the import process."""
         load_dotenv()
         api_key = os.environ.get("CFBD_API_KEY")
         if not api_key:
