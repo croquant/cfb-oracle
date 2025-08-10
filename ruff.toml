@@ -25,7 +25,6 @@ fixable = ["ALL"]
 unfixable = []
 
 [lint.per-file-ignores]
-"core/management/commands/**" = ["ANN", "D"] # Keep
 "tests/**" = ["ANN", "D"]                    # Keep
 
 
