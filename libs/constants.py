@@ -1,4 +1,4 @@
-"""Constants for the Glicko-2 rating system."""
+"""Shared constants for the rating systems (Glicko-2, Elo)."""
 
 from core.models.enums import DivisionClassification
 
@@ -9,6 +9,10 @@ DEFAULT_VOLATILITY = 0.11
 GLICKO2_SCALER = 173.7178
 TAU = 0.9
 CONVERGENCE_TOLERANCE = 0.000001
+
+# Elo constants
+ELO_DEFAULT_RATING = 1500
+ELO_K_FACTOR = 32
 
 # Base ratings and rating deviations for each division
 DIVISION_BASE_RATINGS = {
