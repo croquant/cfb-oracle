@@ -14,7 +14,6 @@ django.setup()
 class Glicko2Test(TestCase):
     def setUp(self):
         """Create a baseline player and deterministic match data."""
-
         self.player = Player(rating=1500, rd=200, vol=0.06, tau=0.5)
 
         # Opponent ratings, deviations, and outcomes from example matches
@@ -30,7 +29,6 @@ class Glicko2Test(TestCase):
 
     def test_pre_rating_rd(self):
         """``_pre_rating_rd`` increases the rating deviation via volatility."""
-
         p = Player(rating=1500, rd=200, vol=0.06, tau=0.5)
         p._pre_rating_rd()
 
@@ -42,7 +40,6 @@ class Glicko2Test(TestCase):
 
     def test_new_vol(self):
         """``_new_vol`` returns the expected post-match volatility."""
-
         v = self.player._v(self.scaled_ratings, self.scaled_rds)
         new_vol = self.player._new_vol(
             self.scaled_ratings, self.scaled_rds, self.outcome_list, v
@@ -53,7 +50,6 @@ class Glicko2Test(TestCase):
 
     def test_new_vol_if_branch(self):
         """``_new_vol`` handles large ``delta`` using the logarithmic case."""
-
         p = Player(rating=1500, rd=30, vol=0.06, tau=0.5)
         rating_list = [500]
         rd_list = [30]
@@ -97,7 +93,6 @@ class Glicko2Test(TestCase):
 
     def test_update_player(self):
         """``update_player`` applies rating, RD, and volatility updates."""
-
         self.player.update_player(
             self.rating_list, self.rd_list, self.outcome_list
         )
@@ -109,7 +104,6 @@ class Glicko2Test(TestCase):
 
     def test_did_not_compete(self):
         """``did_not_compete`` defers updates but increases the RD."""
-
         p = Player(rating=1500, rd=50, vol=0.06, tau=0.5)
         p.did_not_compete()
 
