@@ -1,7 +1,6 @@
 {# Reusable nav link component applying 'active' class for current route #}
 {# Parameters:
  - url_name: name of the URL pattern
- - label: text to display
  - classification: optional classification slug for rankings
  - base_class: CSS class for <a>, defaults to 'nav-link'
  - href: optional explicit href value
@@ -18,24 +17,24 @@
             <a class="{{ base_class|default:'nav-link' }} active"
                aria-current="page"
                href="{% if href %}{{ href }}{% else %}{{ nav_url }}{% endif %}"{% if extra_attrs %} {{ extra_attrs|safe }}{% endif %}>
-                {{ label }}
+                {{ slot }}
             </a>
         {% else %}
             <a class="{{ base_class|default:'nav-link' }}"
                href="{% if href %}{{ href }}{% else %}{{ nav_url }}{% endif %}"{% if extra_attrs %} {{ extra_attrs|safe }}{% endif %}>
-                {{ label }}
+                {{ slot }}
             </a>
         {% endif %}
     {% else %}
         <a class="{{ base_class|default:'nav-link' }} active"
            aria-current="page"
            href="{% if href %}{{ href }}{% else %}{{ nav_url }}{% endif %}"{% if extra_attrs %} {{ extra_attrs|safe }}{% endif %}>
-            {{ label }}
+            {{ slot }}
         </a>
     {% endif %}
 {% else %}
     <a class="{{ base_class|default:'nav-link' }}"
        href="{% if href %}{{ href }}{% else %}{{ nav_url }}{% endif %}"{% if extra_attrs %} {{ extra_attrs|safe }}{% endif %}>
-        {{ label }}
+        {{ slot }}
     </a>
 {% endif %}

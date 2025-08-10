@@ -18,22 +18,25 @@
         <div class="collapse navbar-collapse" id="navbar-menu">
             <ul class="navbar-nav me-auto mb-2 mb-md-0">
                 <li class="nav-item">
-                    {% include "cotton/nav_link.html" with url_name='index' label='Dashboard' %}
+                    <c-nav-link url_name="index">Dashboard</c-nav-link>
                 </li>
                 <li class="nav-item dropdown">
-                    {% include "cotton/nav_link.html" with url_name='rankings' label='Rankings' base_class='nav-link dropdown-toggle' href="#" extra_attrs='role="button" data-bs-toggle="dropdown" aria-expanded="false"' %}
+                    <c-nav-link url_name="rankings"
+                                 base_class="nav-link dropdown-toggle"
+                                 href="#"
+                                 extra_attrs="role='button' data-bs-toggle='dropdown' aria-expanded='false'">Rankings</c-nav-link>
                     <ul class="dropdown-menu dropdown-menu-end mt-md-2 rounded-top-0">
                         <li>
-                            {% include "cotton/nav_link.html" with url_name='rankings' classification='fbs' label='FBS' base_class='dropdown-item' %}
+                            <c-nav-link url_name="rankings" classification="fbs" base_class="dropdown-item">FBS</c-nav-link>
                         </li>
                         <li>
-                            {% include "cotton/nav_link.html" with url_name='rankings' classification='fcs' label='FCS' base_class='dropdown-item' %}
+                            <c-nav-link url_name="rankings" classification="fcs" base_class="dropdown-item">FCS</c-nav-link>
                         </li>
                         <li>
-                            {% include "cotton/nav_link.html" with url_name='rankings' classification='ii' label='Div. II' base_class='dropdown-item' %}
+                            <c-nav-link url_name="rankings" classification="ii" base_class="dropdown-item">Div. II</c-nav-link>
                         </li>
                         <li>
-                            {% include "cotton/nav_link.html" with url_name='rankings' classification='iii' label='Div. III' base_class='dropdown-item' %}
+                            <c-nav-link url_name="rankings" classification="iii" base_class="dropdown-item">Div. III</c-nav-link>
                         </li>
                     </ul>
                 </li>
