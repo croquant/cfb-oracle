@@ -1,0 +1,41 @@
+{# Reusable nav link component applying 'active' class for current route #}
+{# Parameters:
+ - url_name: name of the URL pattern
+ - label: text to display
+ - classification: optional classification slug for rankings
+ - base_class: CSS class for <a>, defaults to 'nav-link'
+ - href: optional explicit href value
+ - extra_attrs: optional extra attributes to append to the tag
+#}
+{% if classification %}
+    {% url url_name classification as nav_url %}
+{% else %}
+    {% url url_name as nav_url %}
+{% endif %}
+{% if request.resolver_match.url_name == url_name %}
+    {% if classification %}
+        {% if request.resolver_match.kwargs.classification == classification %}
+            <a class="{{ base_class|default:'nav-link' }} active"
+               aria-current="page"
+               href="{% if href %}{{ href }}{% else %}{{ nav_url }}{% endif %}"{% if extra_attrs %} {{ extra_attrs|safe }}{% endif %}>
+                {{ label }}
+            </a>
+        {% else %}
+            <a class="{{ base_class|default:'nav-link' }}"
+               href="{% if href %}{{ href }}{% else %}{{ nav_url }}{% endif %}"{% if extra_attrs %} {{ extra_attrs|safe }}{% endif %}>
+                {{ label }}
+            </a>
+        {% endif %}
+    {% else %}
+        <a class="{{ base_class|default:'nav-link' }} active"
+           aria-current="page"
+           href="{% if href %}{{ href }}{% else %}{{ nav_url }}{% endif %}"{% if extra_attrs %} {{ extra_attrs|safe }}{% endif %}>
+            {{ label }}
+        </a>
+    {% endif %}
+{% else %}
+    <a class="{{ base_class|default:'nav-link' }}"
+       href="{% if href %}{{ href }}{% else %}{{ nav_url }}{% endif %}"{% if extra_attrs %} {{ extra_attrs|safe }}{% endif %}>
+        {{ label }}
+    </a>
+{% endif %}

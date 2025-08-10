@@ -18,26 +18,22 @@
         <div class="collapse navbar-collapse" id="navbar-menu">
             <ul class="navbar-nav me-auto mb-2 mb-md-0">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{% url 'index' %}">Dashboard</a>
+                    {% include "cotton/nav_link.html" with url_name='index' label='Dashboard' %}
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle"
-                       href="#"
-                       role="button"
-                       data-bs-toggle="dropdown"
-                       aria-expanded="false">Rankings</a>
+                    {% include "cotton/nav_link.html" with url_name='rankings' label='Rankings' base_class='nav-link dropdown-toggle' href="#" extra_attrs='role="button" data-bs-toggle="dropdown" aria-expanded="false"' %}
                     <ul class="dropdown-menu dropdown-menu-end mt-md-2 rounded-top-0">
                         <li>
-                            <a class="dropdown-item" href="{% url 'rankings' 'fbs' %}">FBS</a>
+                            {% include "cotton/nav_link.html" with url_name='rankings' classification='fbs' label='FBS' base_class='dropdown-item' %}
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{% url 'rankings' 'fcs' %}">FCS</a>
+                            {% include "cotton/nav_link.html" with url_name='rankings' classification='fcs' label='FCS' base_class='dropdown-item' %}
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{% url 'rankings' 'ii' %}">Div. II</a>
+                            {% include "cotton/nav_link.html" with url_name='rankings' classification='ii' label='Div. II' base_class='dropdown-item' %}
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{% url 'rankings' 'iii' %}">Div. III</a>
+                            {% include "cotton/nav_link.html" with url_name='rankings' classification='iii' label='Div. III' base_class='dropdown-item' %}
                         </li>
                     </ul>
                 </li>
