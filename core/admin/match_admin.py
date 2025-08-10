@@ -1,3 +1,5 @@
+"""Admin configuration for match model."""
+
 from django.contrib import admin
 from unfold.admin import ModelAdmin
 
@@ -6,6 +8,8 @@ from core.models.match import Match
 
 @admin.register(Match)
 class MatchAdmin(ModelAdmin):
+    """Admin configuration for the Match model."""
+
     list_display = (
         "start_date",
         "season",

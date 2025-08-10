@@ -1,6 +1,9 @@
+"""Views related to ranking displays."""
+
 import logging
 
 from django.core.cache import cache
+from django.db.models.query import QuerySet
 from django.http import Http404
 from django.views.generic import ListView
 
@@ -17,13 +20,14 @@ class RankingListView(ListView):
     context_object_name = "ratings"
     template_name = "ranking.html"
 
-    def get_template_names(self):
-        # Use HTMX-specific template if requested
+    def get_template_names(self) -> list[str]:
+        """Return template names, using HTMX variant when requested."""
         if self.request.headers.get("HX-Request"):
             return ["cotton/ranking_table.html"]
         return [self.template_name]
 
-    def get_classification(self):
+    def get_classification(self) -> str | None:
+        """Return the classification parameter if valid."""
         classification = self.kwargs.get("classification")
         if (
             classification
@@ -32,7 +36,10 @@ class RankingListView(ListView):
             raise Http404
         return classification
 
-    def get_season_and_week(self, queryset):
+    def get_season_and_week(
+        self, queryset: QuerySet[GlickoRating]
+    ) -> tuple[int | None, int | None, list[int], list[int]]:
+        """Determine available seasons and weeks for rankings."""
         classification = self.get_classification() or ""
         # Seasons
         seasons_key = f"ranking_seasons_{classification}"
@@ -79,7 +86,8 @@ class RankingListView(ListView):
 
         return season, week, seasons, weeks
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[GlickoRating]:
+        """Return the filtered queryset for rankings."""
         classification = self.get_classification()
         qs = GlickoRating.objects.all().select_related("team")
 
@@ -100,7 +108,8 @@ class RankingListView(ListView):
 
         return qs.order_by("-rating")
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs: object) -> dict[str, object]:
+        """Include ranking metadata in the template context."""
         context = super().get_context_data(**kwargs)
         classification = self.get_classification()
 
