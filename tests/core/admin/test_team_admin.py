@@ -1,3 +1,5 @@
+"""Tests for ``TeamAdmin`` and related inlines."""
+
 from django.contrib import admin
 from django.test import TestCase
 
@@ -7,7 +9,10 @@ from core.models.venue import Venue
 
 
 class TeamLogoInlineTests(TestCase):
-    def setUp(self):
+    """Tests for :class:`TeamLogoInline`."""
+
+    def setUp(self) -> None:
+        """Create a team and inline instance for logo tests."""
         self.team = Team.objects.create(
             school="Logo Team",
             color="#ffffff",
@@ -15,13 +20,13 @@ class TeamLogoInlineTests(TestCase):
         )
         self.inline = TeamLogoInline(Team, admin.site)
 
-    def test_preview_with_url(self):
+    def test_preview_with_url(self) -> None:
         """``preview`` renders an image tag when a logo URL exists."""
         logo = TeamLogo.objects.create(team=self.team, url="http://logo")
         html = self.inline.preview(logo)
         self.assertIn('<img src="http://logo" class="h-16" />', html)
 
-    def test_preview_without_url_uses_placeholder(self):
+    def test_preview_without_url_uses_placeholder(self) -> None:
         """``preview`` falls back to a placeholder when no URL is set."""
         logo = TeamLogo(team=self.team)
         html = self.inline.preview(logo)
@@ -29,10 +34,13 @@ class TeamLogoInlineTests(TestCase):
 
 
 class VenueInlineTests(TestCase):
-    def setUp(self):
+    """Tests for :class:`VenueInline`."""
+
+    def setUp(self) -> None:
+        """Create the inline used for venue tests."""
         self.inline = VenueInline(Team, admin.site)
 
-    def test_get_form_queryset_with_location(self):
+    def test_get_form_queryset_with_location(self) -> None:
         """``get_form_queryset`` returns the team's current location."""
         venue = Venue.objects.create(name="Stadium", city="City", state="ST")
         team = Team.objects.create(
@@ -44,12 +52,12 @@ class VenueInlineTests(TestCase):
         qs = self.inline.get_form_queryset(team)
         self.assertEqual(list(qs), [venue])
 
-    def test_get_form_queryset_without_location(self):
+    def test_get_form_queryset_without_location(self) -> None:
         """``get_form_queryset`` is empty when the team has no location."""
         qs = self.inline.get_form_queryset(None)
         self.assertEqual(list(qs), [])
 
-    def test_save_new_instance_sets_parent_location(self):
+    def test_save_new_instance_sets_parent_location(self) -> None:
         """``save_new_instance`` assigns the venue to the parent team."""
         team = Team.objects.create(
             school="Parent",
@@ -62,10 +70,13 @@ class VenueInlineTests(TestCase):
 
 
 class TeamAdminTests(TestCase):
-    def setUp(self):
+    """Tests for :class:`TeamAdmin`."""
+
+    def setUp(self) -> None:
+        """Create the admin instance used in tests."""
         self.admin = TeamAdmin(Team, admin.site)
 
-    def test_logo_display_returns_html(self):
+    def test_logo_display_returns_html(self) -> None:
         """``logo_display`` renders the team's logo when available."""
         team = Team.objects.create(
             school="Display Team",
@@ -76,7 +87,7 @@ class TeamAdminTests(TestCase):
         html = self.admin.logo_display(team)
         self.assertIn('<img src="http://display" class="h-8" />', html)
 
-    def test_logo_display_without_logo(self):
+    def test_logo_display_without_logo(self) -> None:
         """``logo_display`` is ``None`` when the team has no logos."""
         team = Team.objects.create(
             school="No Logo",

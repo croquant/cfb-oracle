@@ -1,3 +1,5 @@
+"""Tests for the :class:`Match` model."""
+
 from datetime import datetime
 from datetime import timezone as dt_timezone
 
@@ -10,7 +12,10 @@ from core.models.team import Team
 
 
 class MatchModelTests(TestCase):
-    def setUp(self):
+    """Tests for ``Match`` model behavior."""
+
+    def setUp(self) -> None:
+        """Create two teams used in match tests."""
         self.home_team = Team.objects.create(
             school="Home Team",
             color="#ffffff",
@@ -23,7 +28,7 @@ class MatchModelTests(TestCase):
         )
         self.start = datetime(2023, 1, 1, 12, 0, tzinfo=dt_timezone.utc)
 
-    def test_incomplete_match_without_scores(self):
+    def test_incomplete_match_without_scores(self) -> None:
         """An incomplete match may omit scores."""
         match = Match.objects.create(
             season=2023,
@@ -37,7 +42,7 @@ class MatchModelTests(TestCase):
         self.assertIsNone(match.home_score)
         self.assertIsNone(match.away_score)
 
-    def test_completed_match_requires_scores(self):
+    def test_completed_match_requires_scores(self) -> None:
         """Completed matches must include scores."""
         with transaction.atomic(), self.assertRaises(IntegrityError):
             Match.objects.create(
@@ -51,7 +56,7 @@ class MatchModelTests(TestCase):
                 home_score=21,
             )
 
-    def test_str_returns_matchup_and_date(self):
+    def test_str_returns_matchup_and_date(self) -> None:
         """``__str__`` returns the matchup and start date."""
         match = Match.objects.create(
             season=2023,

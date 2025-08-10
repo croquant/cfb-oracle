@@ -1,3 +1,5 @@
+"""Tests for the :class:`GlickoRating` model."""
+
 from django.test import TestCase
 
 from core.models.enums import DivisionClassification
@@ -6,6 +8,8 @@ from core.models.team import Team
 
 
 class GlickoRatingModelTests(TestCase):
+    """Behavior tests for :class:`GlickoRating`."""
+
     def _create_team(self, school: str = "Test Team") -> Team:
         """Create a minimal team for use in Glicko rating tests."""
         return Team.objects.create(
@@ -14,7 +18,7 @@ class GlickoRatingModelTests(TestCase):
             alternate_color="#000000",
         )
 
-    def test_str_includes_identifiers(self):
+    def test_str_includes_identifiers(self) -> None:
         """``__str__`` should include season-week, team and rating."""
         team = self._create_team("String Team")
         rating = GlickoRating.objects.create(
@@ -28,7 +32,7 @@ class GlickoRatingModelTests(TestCase):
         )
         self.assertEqual(str(rating), "2024-3 String Team: 1600")
 
-    def test_rating_change_generated_field(self):
+    def test_rating_change_generated_field(self) -> None:
         """``rating_change`` reflects ``rating - previous_rating``."""
         team = self._create_team("Change Team")
         rating = GlickoRating.objects.create(

@@ -1,3 +1,5 @@
+"""Tests for the Glicko-2 rating algorithm implementation."""
+
 import math
 import os
 
@@ -12,7 +14,9 @@ django.setup()
 
 
 class Glicko2Test(TestCase):
-    def setUp(self):
+    """Tests for functions and helpers in :mod:`libs.glicko2`."""
+
+    def setUp(self) -> None:
         """Create a baseline player and deterministic match data."""
         self.player = Player(rating=1500, rd=200, vol=0.06, tau=0.5)
 
@@ -27,7 +31,7 @@ class Glicko2Test(TestCase):
         ]
         self.scaled_rds = [x / GLICKO2_SCALER for x in self.rd_list]
 
-    def test_pre_rating_rd(self):
+    def test_pre_rating_rd(self) -> None:
         """``_pre_rating_rd`` increases the rating deviation via volatility."""
         p = Player(rating=1500, rd=200, vol=0.06, tau=0.5)
         p._pre_rating_rd()
@@ -38,7 +42,7 @@ class Glicko2Test(TestCase):
         )
         self.assertAlmostEqual(p.rd, expected_rd, places=12)
 
-    def test_new_vol(self):
+    def test_new_vol(self) -> None:
         """``_new_vol`` returns the expected post-match volatility."""
         v = self.player._v(self.scaled_ratings, self.scaled_rds)
         new_vol = self.player._new_vol(
@@ -48,7 +52,7 @@ class Glicko2Test(TestCase):
         # Volatility converges to a known value for this match history
         self.assertAlmostEqual(new_vol, 0.05999342315486217)
 
-    def test_new_vol_if_branch(self):
+    def test_new_vol_if_branch(self) -> None:
         """``_new_vol`` handles large ``delta`` using the logarithmic case."""
         p = Player(rating=1500, rd=30, vol=0.06, tau=0.5)
         rating_list = [500]
@@ -67,15 +71,15 @@ class Glicko2Test(TestCase):
             0.06001325617796023,
         )
 
-    def test_new_vol_expands_bounds(self):
+    def test_new_vol_expands_bounds(self) -> None:
         """``_new_vol`` expands the search interval when ``f`` is negative."""
 
         class LoopPlayer(Player):
-            def __init__(self, *args, **kwargs):
+            def __init__(self, *args: object, **kwargs: object) -> None:
                 super().__init__(*args, **kwargs)
                 self._first = True
 
-            def _f(self, x, delta, v, a):
+            def _f(self, x: float, delta: float, v: float, a: float) -> float:
                 if self._first:
                     # Force the initial check negative so the loop executes
                     self._first = False
@@ -91,7 +95,7 @@ class Glicko2Test(TestCase):
         # Forcing the loop still converges to the known post-match volatility.
         self.assertAlmostEqual(new_vol, 0.05999342315486217, places=9)
 
-    def test_update_player(self):
+    def test_update_player(self) -> None:
         """``update_player`` applies rating, RD, and volatility updates."""
         self.player.update_player(
             self.rating_list, self.rd_list, self.outcome_list
@@ -102,7 +106,7 @@ class Glicko2Test(TestCase):
         self.assertAlmostEqual(self.player.rd, 151.51651409762084)
         self.assertAlmostEqual(self.player.vol, 0.05999342315486217)
 
-    def test_did_not_compete(self):
+    def test_did_not_compete(self) -> None:
         """``did_not_compete`` defers updates but increases the RD."""
         p = Player(rating=1500, rd=50, vol=0.06, tau=0.5)
         p.did_not_compete()
