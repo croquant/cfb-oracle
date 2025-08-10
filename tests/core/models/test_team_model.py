@@ -1,3 +1,5 @@
+"""Tests for custom :class:`Team` manager behaviors."""
+
 from django.db import connection
 from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
@@ -6,14 +8,16 @@ from core.models.team import Team, TeamAlternativeName, TeamLogo
 
 
 class TeamManagerTests(TestCase):
+    """Tests for the ``Team`` model manager and related properties."""
+
     def _create_team(
         self,
         school: str,
         logos: list[str],
         alt_names: list[str],
         mascot: str | None = "",
-    ):
-        """Helper to create a team with optional related objects."""
+    ) -> Team:
+        """Create a team with optional related objects."""
         team = Team.objects.create(
             school=school,
             color="#ffffff",
@@ -26,7 +30,7 @@ class TeamManagerTests(TestCase):
             TeamAlternativeName.objects.create(team=team, name=name)
         return team
 
-    def test_prefetch_related(self):
+    def test_prefetch_related(self) -> None:
         """The default manager should prefetch logos and alt names."""
         for idx in range(3):
             # Each team gets two logos and one alternative name
@@ -45,27 +49,27 @@ class TeamManagerTests(TestCase):
         # One query for teams, one for logos, and one for alt names
         self.assertEqual(len(ctx.captured_queries), 3)
 
-    def test_logo_bright(self):
+    def test_logo_bright(self) -> None:
         """``logo_bright`` returns the first logo URL."""
         team = self._create_team("Bright Team", ["url1", "url2"], [])
         self.assertEqual(team.logo_bright, "url1")
 
-    def test_logo_bright_none(self):
+    def test_logo_bright_none(self) -> None:
         """``logo_bright`` is ``None`` when no logos exist."""
         team = self._create_team("No Logo Team", [], [])
         self.assertIsNone(team.logo_bright)
 
-    def test_logo_dark(self):
+    def test_logo_dark(self) -> None:
         """``logo_dark`` returns the second logo URL."""
         team = self._create_team("Dark Team", ["url1", "url2", "url3"], [])
         self.assertEqual(team.logo_dark, "url2")
 
-    def test_logo_dark_none(self):
+    def test_logo_dark_none(self) -> None:
         """``logo_dark`` is ``None`` when fewer than two logos exist."""
         team = self._create_team("Single Logo Team", ["url1"], [])
         self.assertIsNone(team.logo_dark)
 
-    def test_with_related_manager_prefetches(self):
+    def test_with_related_manager_prefetches(self) -> None:
         """Calling ``with_related`` should prefetch related models."""
         for idx in range(3):
             self._create_team(
@@ -88,17 +92,17 @@ class TeamManagerTests(TestCase):
 
         self.assertEqual(len(ctx.captured_queries), 3)
 
-    def test_team_str_with_mascot(self):
+    def test_team_str_with_mascot(self) -> None:
         """``__str__`` should include the mascot when present."""
         team = self._create_team("Georgia", [], [], mascot="Bulldogs")
         self.assertEqual(str(team), "Georgia Bulldogs")
 
-    def test_team_str_without_mascot(self):
+    def test_team_str_without_mascot(self) -> None:
         """``__str__`` without a mascot returns just the school name."""
         team = self._create_team("Georgia Tech", [], [])
         self.assertEqual(str(team), "Georgia Tech")
 
-    def test_save_generates_unique_slugs(self):
+    def test_save_generates_unique_slugs(self) -> None:
         """Saving teams with the same school should increment slug suffix."""
         t1 = self._create_team("Slug School", [], [])
         t2 = self._create_team("Slug School", [], [])
@@ -108,7 +112,7 @@ class TeamManagerTests(TestCase):
         self.assertEqual(t2.slug, "slug-school-1")
         self.assertEqual(t3.slug, "slug-school-2")
 
-    def test_save_preserves_existing_slug(self):
+    def test_save_preserves_existing_slug(self) -> None:
         """Saving again shouldn't alter a valid, unique slug."""
         team = self._create_team("Persistent Slug", [], [])
 
@@ -118,13 +122,13 @@ class TeamManagerTests(TestCase):
         team.save()
         self.assertEqual(team.slug, original)
 
-    def test_team_alternative_name_str(self):
+    def test_team_alternative_name_str(self) -> None:
         """``TeamAlternativeName.__str__`` returns '<name> (<school>)'."""
         team = self._create_team("Name Team", [], ["Nickname"])
         alt = team.alternative_names.first()
         self.assertEqual(str(alt), "Nickname (Name Team)")
 
-    def test_team_logo_str(self):
+    def test_team_logo_str(self) -> None:
         """``TeamLogo.__str__`` includes the team school and URL."""
         team = self._create_team("Logo Team", ["http://logo"], [])
         logo = team.logos.first()

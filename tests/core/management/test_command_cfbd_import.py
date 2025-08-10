@@ -1,3 +1,5 @@
+"""Tests for the CFBD import management command."""
+
 import io
 from argparse import ArgumentParser
 from datetime import date, datetime
@@ -22,16 +24,18 @@ Command = import_module("core.management.commands.cfbd_import").Command
 class ImportCommandTests(TestCase):
     """Tests for the CFBD import management command."""
 
-    def setUp(self):
+    def setUp(self) -> None:
+        """Create command instance and capture output streams."""
         self.command = Command()
         self.command.stdout = io.StringIO()
         self.command.stderr = io.StringIO()
 
-    def _ns(self, **kwargs):
+    def _ns(self, **kwargs: object) -> Namespace:
         """Shorthand for creating simple namespaces."""
         return Namespace(**kwargs)
 
-    def _sample_venue(self, capacity: int = 55000):
+    def _sample_venue(self, capacity: int = 55000) -> Namespace:
+        """Return a sample venue payload."""
         return self._ns(
             id=1,
             name="Bobby Dodd Stadium",
@@ -49,7 +53,10 @@ class ImportCommandTests(TestCase):
             dome=False,
         )
 
-    def _sample_conference(self, name: str = "Atlantic Coast Conference"):
+    def _sample_conference(
+        self, name: str = "Atlantic Coast Conference"
+    ) -> Namespace:
+        """Return a sample conference payload."""
         return self._ns(
             id=1,
             name=name,
@@ -58,14 +65,15 @@ class ImportCommandTests(TestCase):
             classification="fbs",
         )
 
-    def _import_prerequisites(self):
+    def _import_prerequisites(self) -> None:
         """Import a sample venue and conference for team/game tests."""
         venue_api = self._ns(get_venues=lambda: [self._sample_venue()])
         self.command.import_venues(venue_api)
         conf_api = self._ns(get_conferences=lambda: [self._sample_conference()])
         self.command.import_conferences(conf_api)
 
-    def _teams_payload(self):
+    def _teams_payload(self) -> list[Namespace]:
+        """Return a list of sample team payloads."""
         return [
             self._ns(
                 id=1,
@@ -111,13 +119,14 @@ class ImportCommandTests(TestCase):
             ),
         ]
 
-    def _import_sample_teams(self):
+    def _import_sample_teams(self) -> list[Namespace]:
+        """Import sample teams and return their payloads."""
         teams = self._teams_payload()
         api = self._ns(get_teams=lambda conference=None, year=None: teams)
         self.command.import_teams(api)
         return teams
 
-    def test_add_arguments(self):
+    def test_add_arguments(self) -> None:
         """``add_arguments`` defines all expected options with defaults."""
         parser = ArgumentParser()
         self.command.add_arguments(parser)
@@ -127,7 +136,7 @@ class ImportCommandTests(TestCase):
         self.assertEqual(args.start_year, 1869)
         self.assertEqual(args.end_year, date.today().year)
 
-    def test_import_venues(self):
+    def test_import_venues(self) -> None:
         """``import_venues`` creates and updates :class:`Venue` records."""
         venues = [self._sample_venue()]
         api = self._ns(get_venues=lambda: venues)
@@ -142,7 +151,7 @@ class ImportCommandTests(TestCase):
         venue.refresh_from_db()
         self.assertEqual(venue.capacity, 56000)
 
-    def test_import_conferences(self):
+    def test_import_conferences(self) -> None:
         """``import_conferences`` creates and updates Conference records."""
         conferences = [self._sample_conference()]
         api = self._ns(get_conferences=lambda: conferences)
@@ -157,7 +166,7 @@ class ImportCommandTests(TestCase):
         conf.refresh_from_db()
         self.assertEqual(conf.name, "ACC Updated")
 
-    def test_import_teams(self):
+    def test_import_teams(self) -> None:
         """``import_teams`` creates and updates teams and related records."""
         self._import_prerequisites()
         teams = self._import_sample_teams()
@@ -188,7 +197,7 @@ class ImportCommandTests(TestCase):
         self.assertEqual(t1.logos.count(), 2)
         self.assertEqual(t1.alternative_names.count(), 2)
 
-    def test_import_games(self):
+    def test_import_games(self) -> None:
         """``import_games`` creates and updates :class:`Match` records."""
         self._import_prerequisites()
         self._import_sample_teams()
@@ -265,7 +274,7 @@ class ImportCommandTests(TestCase):
         self.assertEqual(m1.away_score, 20)
 
     @patch("core.management.commands.cfbd_import.load_dotenv")
-    def test_handle_requires_api_key(self, mock_load_dotenv):
+    def test_handle_requires_api_key(self, mock_load_dotenv: MagicMock) -> None:
         """``handle`` raises :class:`CommandError` when API key is missing."""
         with (
             patch.dict("os.environ", {}, clear=True),
@@ -284,8 +293,13 @@ class ImportCommandTests(TestCase):
     @patch("core.management.commands.cfbd_import.cfbd.ConferencesApi")
     @patch("core.management.commands.cfbd_import.cfbd.VenuesApi")
     def test_handle_api_exception(
-        self, mock_venues, mock_confs, mock_teams, mock_games, mock_client
-    ):
+        self,
+        mock_venues: MagicMock,
+        mock_confs: MagicMock,
+        mock_teams: MagicMock,
+        mock_games: MagicMock,
+        mock_client: MagicMock,
+    ) -> None:
         """``handle`` catches :class:`ApiException` and logs it to stderr."""
         mock_client.return_value.__enter__.return_value = object()
         mock_client.return_value.__exit__.return_value = False
@@ -313,8 +327,13 @@ class ImportCommandTests(TestCase):
     @patch("core.management.commands.cfbd_import.cfbd.ConferencesApi")
     @patch("core.management.commands.cfbd_import.cfbd.VenuesApi")
     def test_handle_success(
-        self, mock_venues, mock_confs, mock_teams, mock_games, mock_client
-    ):
+        self,
+        mock_venues: MagicMock,
+        mock_confs: MagicMock,
+        mock_teams: MagicMock,
+        mock_games: MagicMock,
+        mock_client: MagicMock,
+    ) -> None:
         """``handle`` runs all import steps when API key is present."""
         mock_client.return_value.__enter__.return_value = object()
         mock_client.return_value.__exit__.return_value = False
