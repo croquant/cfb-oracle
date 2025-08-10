@@ -243,11 +243,14 @@ class Command(BaseCommand):
             if recs:
                 r_list = [r for r, _, _, _ in recs]
                 rd_list = [rd for _, rd, _, _ in recs]
-                max_log_margin = math.log(margin_weight_cap + 1)
-                o_list = [
-                    0.5 + (o - 0.5) * min(lm, max_log_margin) / max_log_margin
-                    for _, _, lm, o in recs
-                ]
+                log_cap = math.log(margin_weight_cap + 1)
+                o_list = []
+                for r, _, lm, o in recs:
+                    rating_diff = abs(before_rating - r)
+                    denom = rating_diff * 0.001 + 2.2
+                    max_factor = log_cap * 2.2 / denom
+                    factor = min(lm * 2.2 / denom, max_factor) / max_factor
+                    o_list.append(0.5 + (o - 0.5) * factor)
                 player.update_player(r_list, rd_list, o_list)
             else:
                 player.did_not_compete()
