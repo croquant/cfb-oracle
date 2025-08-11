@@ -2,11 +2,11 @@
 
 import io
 import math
-from importlib import import_module
 
 from django.test import TestCase
 from django.utils import timezone
 
+from core.management.commands.elo import Command
 from core.models.elo import EloRating
 from core.models.enums import SeasonType
 from core.models.match import Match
@@ -17,10 +17,7 @@ from libs.constants import (
     ELO_K_FACTOR,
     ELO_SCORE_DIFFERENTIAL_BASE,
 )
-
-elo_module = import_module("core.management.commands.elo")
-Command = elo_module.Command
-_expected_score = elo_module._expected_score
+from libs.elo import expected_score
 
 
 class EloCommandTests(TestCase):
@@ -99,7 +96,7 @@ class EloCommandTests(TestCase):
         )
         self.assertAlmostEqual(a_ratings[0].rating_before, ELO_DEFAULT_RATING)
 
-        expected_a_home = _expected_score(
+        expected_a_home = expected_score(
             ELO_DEFAULT_RATING + ELO_HOME_ADVANTAGE, ELO_DEFAULT_RATING
         )
         margin1 = math.log(10 + 1, ELO_SCORE_DIFFERENTIAL_BASE)
@@ -110,7 +107,7 @@ class EloCommandTests(TestCase):
             0 - (1 - expected_a_home)
         )
 
-        expected_b_home = _expected_score(
+        expected_b_home = expected_score(
             b_after1 + ELO_HOME_ADVANTAGE, a_after1
         )
         margin2 = math.log(20 + 1, ELO_SCORE_DIFFERENTIAL_BASE)
@@ -168,7 +165,7 @@ class EloCommandTests(TestCase):
         b_ratings = list(
             EloRating.objects.filter(team=b).order_by("match__week")
         )
-        expected_b_away = _expected_score(
+        expected_b_away = expected_score(
             ELO_DEFAULT_RATING, ELO_DEFAULT_RATING + ELO_HOME_ADVANTAGE
         )
         margin = math.log(10 + 1, ELO_SCORE_DIFFERENTIAL_BASE)
@@ -279,7 +276,7 @@ class EloCommandTests(TestCase):
         self.assertEqual(EloRating.objects.count(), 2)
         home_rating = EloRating.objects.get(team=a)
         away_rating = EloRating.objects.get(team=b)
-        expected = _expected_score(ELO_DEFAULT_RATING, ELO_DEFAULT_RATING)
+        expected = expected_score(ELO_DEFAULT_RATING, ELO_DEFAULT_RATING)
         margin = math.log(10 + 1, ELO_SCORE_DIFFERENTIAL_BASE)
         home_after = ELO_DEFAULT_RATING + ELO_K_FACTOR * margin * (1 - expected)
         away_after = ELO_DEFAULT_RATING + ELO_K_FACTOR * margin * (
