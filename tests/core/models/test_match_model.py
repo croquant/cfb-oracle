@@ -56,6 +56,19 @@ class MatchModelTests(TestCase):
                 home_score=21,
             )
 
+    def test_home_and_away_teams_must_differ(self) -> None:
+        """A match cannot have the same team as both home and away."""
+        with transaction.atomic(), self.assertRaises(IntegrityError):
+            Match.objects.create(
+                season=2023,
+                week=1,
+                season_type=SeasonType.REGULAR,
+                start_date=self.start,
+                completed=False,
+                home_team=self.home_team,
+                away_team=self.home_team,
+            )
+
     def test_str_returns_matchup_and_date(self) -> None:
         """``__str__`` returns the matchup and start date."""
         match = Match.objects.create(
