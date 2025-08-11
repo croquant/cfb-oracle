@@ -84,7 +84,11 @@ class Match(models.Model):
                     )
                 ),
                 name="completed_requires_scores",
-            )
+            ),
+            models.CheckConstraint(
+                check=~models.Q(home_team=models.F("away_team")),
+                name="home_away_team_diff",
+            ),
         ]
         ordering = ["-start_date"]
 
