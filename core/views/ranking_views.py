@@ -89,7 +89,11 @@ class RankingListView(ListView):
     def get_queryset(self) -> QuerySet[GlickoRating]:
         """Return the filtered queryset for rankings."""
         classification = self.get_classification()
-        qs = GlickoRating.objects.all().select_related("team")
+        qs = (
+            GlickoRating.objects.all()
+            .select_related("team")
+            .prefetch_related("team__logos", "team__alternative_names")
+        )
 
         if classification:
             qs = qs.filter(classification=classification)
