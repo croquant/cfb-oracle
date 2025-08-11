@@ -13,6 +13,7 @@ CONVERGENCE_TOLERANCE = 0.000001
 # Elo constants
 ELO_DEFAULT_RATING = 1500
 ELO_K_FACTOR = 32
+ELO_HOME_ADVANTAGE = 55
 
 # Base ratings and rating deviations for each division
 DIVISION_BASE_RATINGS = {
