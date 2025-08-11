@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+    <c-card title="{{ team }}">
+        {% if team.conference %}
+            <p>Conference: {{ team.conference }}</p>
+        {% endif %}
+        {% if team.classification %}
+            <p>Classification: {{ team.get_classification_display }}</p>
+        {% endif %}
+        {% if team.abbreviation %}
+            <p>Abbreviation: {{ team.abbreviation }}</p>
+        {% endif %}
+    </c-card>
+{% endblock content %}

@@ -1,6 +1,7 @@
 """Models for teams and related metadata."""
 
 from django.db import models
+from django.urls import reverse
 from django.utils.text import slugify
 
 from core.models.conference import Conference
@@ -102,6 +103,10 @@ class Team(models.Model):
                 counter += 1
             self.slug = slug
         super().save(*args, **kwargs)
+
+    def get_absolute_url(self) -> str:
+        """Return the URL for this team's detail page."""
+        return reverse("team-detail", args=[self.slug])
 
     @property
     def logo_bright(self) -> str | None:
