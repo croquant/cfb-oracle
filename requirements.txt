@@ -4,7 +4,7 @@ cfbd==5.9.2
 cfgv==3.4.0
 click==8.2.1
 colorama==0.4.6
-coverage==7.10.2
+coverage==7.10.3
 cssbeautifier==1.15.4
 distlib==0.4.0
 Django==5.2.4
