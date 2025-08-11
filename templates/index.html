@@ -1,6 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
-    <c-card title="Home">
-    {% lorem 4 p %}
-    </c-card>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <c-card title="Upcoming Games">
+                <ul class="list-unstyled mb-0">
+                    {% for game in upcoming_games %}
+                        <li>
+                            {{ game.start_date|date:"M j, g:i a" }} -
+                            {{ game.away_team.name }} @ {{ game.home_team.name }}
+                        </li>
+                    {% empty %}
+                        <li>No upcoming games.</li>
+                    {% endfor %}
+                </ul>
+            </c-card>
+        </div>
+        <div class="col-md-6">
+            <c-card title="Top Teams">
+                <ol class="mb-0">
+                    {% for rating in top_teams %}
+                        <li>{{ rating.team.name }} ({{ rating.rating|floatformat:1 }})</li>
+                    {% empty %}
+                        <li>No ratings available.</li>
+                    {% endfor %}
+                </ol>
+            </c-card>
+        </div>
+    </div>
 {% endblock content %}
