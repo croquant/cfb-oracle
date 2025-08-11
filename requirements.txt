@@ -21,7 +21,7 @@ nodeenv==1.9.1
 pathspec==0.12.1
 platformdirs==4.3.8
 pre_commit==4.3.0
-pydantic==1.10.22
+pydantic==2.11.7
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
 PyYAML==6.0.2
