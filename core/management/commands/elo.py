@@ -1,22 +1,11 @@
 """Management command to calculate Elo ratings for matches."""
 
-import math
-
 from django.core.management.base import BaseCommand
 
 from core.models.elo import EloRating
 from core.models.match import Match
-from libs.constants import (
-    ELO_DEFAULT_RATING,
-    ELO_HOME_ADVANTAGE,
-    ELO_K_FACTOR,
-    ELO_SCORE_DIFFERENTIAL_BASE,
-)
-
-
-def _expected_score(rating_a: float, rating_b: float) -> float:
-    """Return expected score for ``rating_a`` against ``rating_b``."""
-    return 1 / (1 + 10 ** ((rating_b - rating_a) / 400))
+from libs.constants import ELO_DEFAULT_RATING, ELO_K_FACTOR
+from libs.elo import update_ratings
 
 
 class Command(BaseCommand):
@@ -53,29 +42,13 @@ class Command(BaseCommand):
                 # skip matches without scores
                 continue
 
-            if match.home_score > match.away_score:
-                home_actual, away_actual = 1.0, 0.0
-            elif match.home_score < match.away_score:
-                home_actual, away_actual = 0.0, 1.0
-            else:
-                home_actual = away_actual = 0.5
-
-            advantage = 0 if match.neutral_site else ELO_HOME_ADVANTAGE
-            expected_home = _expected_score(
-                home_before + advantage, away_before
-            )
-            expected_away = 1 - expected_home
-
-            score_diff = abs(match.home_score - match.away_score)
-            # Rating change formula with score differential scaling:
-            # rating_after = rating_before + K * log(diff + 1, BASE)
-            #                 * (actual - expected)
-            margin = math.log(score_diff + 1, ELO_SCORE_DIFFERENTIAL_BASE)
-            home_after = home_before + self.k_factor * margin * (
-                home_actual - expected_home
-            )
-            away_after = away_before + self.k_factor * margin * (
-                away_actual - expected_away
+            home_after, away_after = update_ratings(
+                home_before,
+                away_before,
+                match.home_score,
+                match.away_score,
+                k_factor=self.k_factor,
+                neutral_site=match.neutral_site,
             )
 
             self.stdout.write(
