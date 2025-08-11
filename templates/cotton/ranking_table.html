@@ -1,10 +1,12 @@
 <div id="ranking-table">
+    <div id="loading-spinner" class="spinner-border d-none"></div>
     <form class="row mb-3"
           hx-get="{{ request.path }}"
           hx-trigger="change"
           hx-target="#ranking-table"
           hx-swap="outerHTML"
-          hx-replace-url="true">
+          hx-replace-url="true"
+          hx-indicator="#loading-spinner">
         <div class="col">
             <label for="season-select" class="form-label">Season</label>
             <select id="season-select" name="season" class="form-select rounded-0">
