@@ -1,10 +1,12 @@
 """Management command to calculate Elo ratings for matches."""
 
-from django.core.management.base import BaseCommand
+import argparse
+
+from django.core.management.base import BaseCommand, CommandError
 
 from core.models.elo import EloRating
 from core.models.match import Match
-from libs.constants import ELO_DEFAULT_RATING, ELO_K_FACTOR
+from libs.constants import ELO_DECAY_DEFAULT, ELO_DEFAULT_RATING, ELO_K_FACTOR
 from libs.elo import update_ratings
 
 
@@ -15,8 +17,33 @@ class Command(BaseCommand):
 
     k_factor = ELO_K_FACTOR
 
+    def add_arguments(self, parser: argparse.ArgumentParser) -> None:  # noqa: D401
+        """Add command arguments."""
+        parser.add_argument(
+            "--decay",
+            type=float,
+            default=ELO_DECAY_DEFAULT,
+            help=(
+                "Fraction of a team's rating carried over between seasons "
+                "(0 for full reset, 1 for no decay)."
+            ),
+        )
+
+    def _decay_ratings(self, ratings: dict[int, float], decay: float) -> None:
+        """Adjust ratings toward the baseline when the season changes."""
+        for team_id, rating in ratings.items():
+            ratings[team_id] = (
+                ELO_DEFAULT_RATING
+                if decay == 0
+                else rating * decay + ELO_DEFAULT_RATING * (1 - decay)
+            )
+
     def handle(self, *args: str, **options: int | str | None) -> None:  # noqa: D401
         """Run the Elo rating calculation."""
+        decay = float(options.get("decay", ELO_DECAY_DEFAULT))
+        if not 0 <= decay <= 1:
+            raise CommandError("decay must be between 0 and 1")
+
         self.stdout.write("Clearing existing Elo ratings...")
         EloRating.objects.all().delete()
 
@@ -28,7 +55,15 @@ class Command(BaseCommand):
             "season", "week", "start_date", "id"
         )
 
+        current_season: int | None = None
+
         for match in matches:
+            if current_season is None:
+                current_season = match.season
+            elif match.season != current_season:
+                current_season = match.season
+                self._decay_ratings(current_ratings, decay)
+
             home_before = current_ratings.get(
                 match.home_team_id, ELO_DEFAULT_RATING
             )

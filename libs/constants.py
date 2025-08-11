@@ -14,6 +14,7 @@ CONVERGENCE_TOLERANCE = 0.000001
 ELO_DEFAULT_RATING = 1500
 ELO_K_FACTOR = 32
 ELO_HOME_ADVANTAGE = 55
+ELO_DECAY_DEFAULT = 0.75  # Fraction of a rating retained between seasons
 # Base for logarithmic score differential scaling in the Elo formula.
 # Rating change = K * log(diff + 1, ELO_SCORE_DIFFERENTIAL_BASE)
 #                 * (actual - expected)
