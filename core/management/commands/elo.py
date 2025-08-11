@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 from core.models.elo import EloRating
 from core.models.match import Match
-from libs.constants import ELO_DEFAULT_RATING, ELO_K_FACTOR
+from libs.constants import ELO_DEFAULT_RATING, ELO_HOME_ADVANTAGE, ELO_K_FACTOR
 
 
 def _expected_score(rating_a: float, rating_b: float) -> float:
@@ -53,8 +53,11 @@ class Command(BaseCommand):
             else:
                 home_actual = away_actual = 0.5
 
-            expected_home = _expected_score(home_before, away_before)
-            expected_away = _expected_score(away_before, home_before)
+            advantage = 0 if match.neutral_site else ELO_HOME_ADVANTAGE
+            expected_home = _expected_score(
+                home_before + advantage, away_before
+            )
+            expected_away = 1 - expected_home
 
             home_after = home_before + self.k_factor * (
                 home_actual - expected_home
