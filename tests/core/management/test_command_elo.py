@@ -14,6 +14,7 @@ from core.models.enums import SeasonType
 from core.models.match import Match
 from core.models.team import Team
 from libs.constants import (
+    ELO_DECAY_DEFAULT,
     ELO_DEFAULT_RATING,
     ELO_HOME_ADVANTAGE,
     ELO_K_FACTOR,
@@ -169,7 +170,10 @@ class EloCommandTests(TestCase):
         a_after, _ = update_ratings(
             ELO_DEFAULT_RATING, ELO_DEFAULT_RATING, 20, 10
         )
-        expected_start = (a_after + ELO_DEFAULT_RATING) / 2
+        expected_start = (
+            ELO_DEFAULT_RATING
+            + (a_after - ELO_DEFAULT_RATING) * ELO_DECAY_DEFAULT
+        )
         self.assertAlmostEqual(
             a_ratings[1].rating_before, expected_start, places=2
         )
@@ -248,6 +252,7 @@ class EloCommandTests(TestCase):
         self.command.add_arguments(parser)
         options = parser.parse_args([])
         self.assertTrue(hasattr(options, "decay"))
+        self.assertEqual(options.decay, ELO_DECAY_DEFAULT)
 
     def test_handle_invalid_decay_raises_error(self) -> None:
         """Invalid decay percentages raise ``CommandError``."""
