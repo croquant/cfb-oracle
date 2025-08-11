@@ -1,6 +1,8 @@
 """Management command to calculate Elo ratings for matches."""
 
-from django.core.management.base import BaseCommand
+import argparse
+
+from django.core.management.base import BaseCommand, CommandError
 
 from core.models.elo import EloRating
 from core.models.match import Match
@@ -15,8 +17,24 @@ class Command(BaseCommand):
 
     k_factor = ELO_K_FACTOR
 
+    def add_arguments(self, parser: argparse.ArgumentParser) -> None:  # noqa: D401
+        """Add command arguments."""
+        parser.add_argument(
+            "--decay",
+            type=float,
+            default=0.5,
+            help=(
+                "Fraction of a team's rating carried over between seasons "
+                "(0 for full reset, 1 for no decay)."
+            ),
+        )
+
     def handle(self, *args: str, **options: int | str | None) -> None:  # noqa: D401
         """Run the Elo rating calculation."""
+        decay = float(options.get("decay", 0.5))
+        if not 0 <= decay <= 1:
+            raise CommandError("decay must be between 0 and 1")
+
         self.stdout.write("Clearing existing Elo ratings...")
         EloRating.objects.all().delete()
 
@@ -28,7 +46,20 @@ class Command(BaseCommand):
             "season", "week", "start_date", "id"
         )
 
+        current_season: int | None = None
+
         for match in matches:
+            if current_season is None:
+                current_season = match.season
+            elif match.season != current_season:
+                current_season = match.season
+                for team_id, rating in current_ratings.items():
+                    current_ratings[team_id] = (
+                        ELO_DEFAULT_RATING
+                        if decay == 0
+                        else rating * decay + ELO_DEFAULT_RATING * (1 - decay)
+                    )
+
             home_before = current_ratings.get(
                 match.home_team_id, ELO_DEFAULT_RATING
             )

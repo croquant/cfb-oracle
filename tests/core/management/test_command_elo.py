@@ -1,8 +1,10 @@
 """Tests for the elo management command."""
 
+import argparse
 import io
 import math
 
+from django.core.management.base import CommandError
 from django.test import TestCase
 from django.utils import timezone
 
@@ -17,7 +19,7 @@ from libs.constants import (
     ELO_K_FACTOR,
     ELO_SCORE_DIFFERENTIAL_BASE,
 )
-from libs.elo import expected_score
+from libs.elo import expected_score, update_ratings
 
 
 class EloCommandTests(TestCase):
@@ -135,6 +137,122 @@ class EloCommandTests(TestCase):
             ),
             output,
         )
+
+    def test_handle_decays_between_seasons(self) -> None:
+        """Ratings move toward the baseline between seasons."""
+        a = self._team("A")
+        b = self._team("B")
+        self._match(
+            season=2023,
+            week=1,
+            home=a,
+            away=b,
+            home_score=20,
+            away_score=10,
+        )
+        self._match(
+            season=2024,
+            week=1,
+            home=a,
+            away=b,
+            home_score=20,
+            away_score=10,
+        )
+
+        self.command.handle()
+
+        a_ratings = list(
+            EloRating.objects.filter(team=a).order_by(
+                "match__season", "match__week"
+            )
+        )
+        a_after, _ = update_ratings(
+            ELO_DEFAULT_RATING, ELO_DEFAULT_RATING, 20, 10
+        )
+        expected_start = (a_after + ELO_DEFAULT_RATING) / 2
+        self.assertAlmostEqual(
+            a_ratings[1].rating_before, expected_start, places=2
+        )
+
+    def test_handle_decay_zero_resets(self) -> None:
+        """``decay=0`` resets ratings at season boundaries."""
+        a = self._team("A")
+        b = self._team("B")
+        self._match(
+            season=2023,
+            week=1,
+            home=a,
+            away=b,
+            home_score=20,
+            away_score=10,
+        )
+        self._match(
+            season=2024,
+            week=1,
+            home=a,
+            away=b,
+            home_score=20,
+            away_score=10,
+        )
+
+        self.command.handle(decay=0)
+
+        a_ratings = list(
+            EloRating.objects.filter(team=a).order_by(
+                "match__season", "match__week"
+            )
+        )
+        self.assertEqual(a_ratings[1].rating_before, ELO_DEFAULT_RATING)
+
+    def test_handle_custom_decay_option(self) -> None:
+        """Decay percentage can be controlled via ``decay`` option."""
+        a = self._team("A")
+        b = self._team("B")
+        self._match(
+            season=2023,
+            week=1,
+            home=a,
+            away=b,
+            home_score=20,
+            away_score=10,
+        )
+        self._match(
+            season=2024,
+            week=1,
+            home=a,
+            away=b,
+            home_score=20,
+            away_score=10,
+        )
+
+        self.command.handle(decay=0.25)
+
+        a_ratings = list(
+            EloRating.objects.filter(team=a).order_by(
+                "match__season", "match__week"
+            )
+        )
+        a_after, _ = update_ratings(
+            ELO_DEFAULT_RATING, ELO_DEFAULT_RATING, 20, 10
+        )
+        expected_start = (
+            ELO_DEFAULT_RATING + (a_after - ELO_DEFAULT_RATING) * 0.25
+        )
+        self.assertAlmostEqual(
+            a_ratings[1].rating_before, expected_start, places=2
+        )
+
+    def test_add_arguments_defines_decay_option(self) -> None:
+        """``add_arguments`` adds a ``decay`` option."""
+        parser = argparse.ArgumentParser()
+        self.command.add_arguments(parser)
+        options = parser.parse_args([])
+        self.assertTrue(hasattr(options, "decay"))
+
+    def test_handle_invalid_decay_raises_error(self) -> None:
+        """Invalid decay percentages raise ``CommandError``."""
+        with self.assertRaises(CommandError):
+            self.command.handle(decay=1.5)
 
     def test_handle_away_win_and_tie(self) -> None:
         """Away wins and ties are reflected in rating changes."""
