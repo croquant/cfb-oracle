@@ -1,10 +1,17 @@
 """Management command to calculate Elo ratings for matches."""
 
+import math
+
 from django.core.management.base import BaseCommand
 
 from core.models.elo import EloRating
 from core.models.match import Match
-from libs.constants import ELO_DEFAULT_RATING, ELO_HOME_ADVANTAGE, ELO_K_FACTOR
+from libs.constants import (
+    ELO_DEFAULT_RATING,
+    ELO_HOME_ADVANTAGE,
+    ELO_K_FACTOR,
+    ELO_SCORE_DIFFERENTIAL_BASE,
+)
 
 
 def _expected_score(rating_a: float, rating_b: float) -> float:
@@ -59,10 +66,15 @@ class Command(BaseCommand):
             )
             expected_away = 1 - expected_home
 
-            home_after = home_before + self.k_factor * (
+            score_diff = abs(match.home_score - match.away_score)
+            # Rating change formula with score differential scaling:
+            # rating_after = rating_before + K * log(diff + 1, BASE)
+            #                 * (actual - expected)
+            margin = math.log(score_diff + 1, ELO_SCORE_DIFFERENTIAL_BASE)
+            home_after = home_before + self.k_factor * margin * (
                 home_actual - expected_home
             )
-            away_after = away_before + self.k_factor * (
+            away_after = away_before + self.k_factor * margin * (
                 away_actual - expected_away
             )
 

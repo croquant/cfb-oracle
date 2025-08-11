@@ -1,6 +1,7 @@
 """Tests for the elo management command."""
 
 import io
+import math
 from importlib import import_module
 
 from django.test import TestCase
@@ -14,6 +15,7 @@ from libs.constants import (
     ELO_DEFAULT_RATING,
     ELO_HOME_ADVANTAGE,
     ELO_K_FACTOR,
+    ELO_SCORE_DIFFERENTIAL_BASE,
 )
 
 elo_module = import_module("core.management.commands.elo")
@@ -100,16 +102,22 @@ class EloCommandTests(TestCase):
         expected_a_home = _expected_score(
             ELO_DEFAULT_RATING + ELO_HOME_ADVANTAGE, ELO_DEFAULT_RATING
         )
-        a_after1 = ELO_DEFAULT_RATING + ELO_K_FACTOR * (1 - expected_a_home)
-        b_after1 = ELO_DEFAULT_RATING + ELO_K_FACTOR * (
+        margin1 = math.log(10 + 1, ELO_SCORE_DIFFERENTIAL_BASE)
+        a_after1 = ELO_DEFAULT_RATING + ELO_K_FACTOR * margin1 * (
+            1 - expected_a_home
+        )
+        b_after1 = ELO_DEFAULT_RATING + ELO_K_FACTOR * margin1 * (
             0 - (1 - expected_a_home)
         )
 
         expected_b_home = _expected_score(
             b_after1 + ELO_HOME_ADVANTAGE, a_after1
         )
-        b_after2 = b_after1 + ELO_K_FACTOR * (1 - expected_b_home)
-        a_after2 = a_after1 + ELO_K_FACTOR * (0 - (1 - expected_b_home))
+        margin2 = math.log(20 + 1, ELO_SCORE_DIFFERENTIAL_BASE)
+        b_after2 = b_after1 + ELO_K_FACTOR * margin2 * (1 - expected_b_home)
+        a_after2 = a_after1 + ELO_K_FACTOR * margin2 * (
+            0 - (1 - expected_b_home)
+        )
 
         self.assertAlmostEqual(a_ratings[0].rating_after, a_after1, places=2)
         self.assertAlmostEqual(a_ratings[1].rating_before, a_after1, places=2)
@@ -163,9 +171,12 @@ class EloCommandTests(TestCase):
         expected_b_away = _expected_score(
             ELO_DEFAULT_RATING, ELO_DEFAULT_RATING + ELO_HOME_ADVANTAGE
         )
-        b_after = ELO_DEFAULT_RATING + ELO_K_FACTOR * (1 - expected_b_away)
+        margin = math.log(10 + 1, ELO_SCORE_DIFFERENTIAL_BASE)
+        b_after = ELO_DEFAULT_RATING + ELO_K_FACTOR * margin * (
+            1 - expected_b_away
+        )
         self.assertAlmostEqual(b_ratings[0].rating_after, b_after, places=2)
-        self.assertLess(b_ratings[1].rating_after, b_ratings[0].rating_after)
+        self.assertEqual(b_ratings[1].rating_after, b_ratings[0].rating_after)
 
     def test_home_vs_away_advantage(self) -> None:
         """Away wins yield larger gains than home wins with equal ratings."""
@@ -208,6 +219,47 @@ class EloCommandTests(TestCase):
 
         self.assertGreater(away_gain, home_gain)
 
+    def test_score_differential_scales_adjustment(self) -> None:
+        """Blowout wins produce larger rating gains than close wins."""
+        a = self._team("A")
+        b = self._team("B")
+
+        # close win
+        self._match(
+            season=2024,
+            week=1,
+            home=a,
+            away=b,
+            home_score=21,
+            away_score=20,
+        )
+        self.command.handle()
+        close_gain = (
+            EloRating.objects.get(team=a).rating_after - ELO_DEFAULT_RATING
+        )
+
+        # reset for blowout
+        Match.objects.all().delete()
+        EloRating.objects.all().delete()
+        self.command = Command()
+        self.command.stdout = io.StringIO()
+        self.command.stderr = io.StringIO()
+
+        self._match(
+            season=2024,
+            week=1,
+            home=a,
+            away=b,
+            home_score=42,
+            away_score=14,
+        )
+        self.command.handle()
+        blowout_gain = (
+            EloRating.objects.get(team=a).rating_after - ELO_DEFAULT_RATING
+        )
+
+        self.assertGreater(blowout_gain, close_gain)
+
     def test_neutral_site_no_home_advantage(self) -> None:
         """Neutral site matches do not apply home-field advantage."""
         a = self._team("A")
@@ -228,8 +280,11 @@ class EloCommandTests(TestCase):
         home_rating = EloRating.objects.get(team=a)
         away_rating = EloRating.objects.get(team=b)
         expected = _expected_score(ELO_DEFAULT_RATING, ELO_DEFAULT_RATING)
-        home_after = ELO_DEFAULT_RATING + ELO_K_FACTOR * (1 - expected)
-        away_after = ELO_DEFAULT_RATING + ELO_K_FACTOR * (0 - (1 - expected))
+        margin = math.log(10 + 1, ELO_SCORE_DIFFERENTIAL_BASE)
+        home_after = ELO_DEFAULT_RATING + ELO_K_FACTOR * margin * (1 - expected)
+        away_after = ELO_DEFAULT_RATING + ELO_K_FACTOR * margin * (
+            0 - (1 - expected)
+        )
 
         self.assertAlmostEqual(home_rating.rating_after, home_after, places=2)
         self.assertAlmostEqual(away_rating.rating_after, away_after, places=2)
