@@ -20,6 +20,7 @@
 
 ## Frontend Templates
 
+- Use [Halfmoon](https://www.gethalfmoon.com/) CSS for styling.
 - Use [django-cotton](https://github.com/adamghill/django-cotton) components whenever possible to keep templates consistent.
 - Use [htmx](https://htmx.org/) for dynamic page interactions.
 - Use [Alpine.js](https://alpinejs.dev/) only when functionality cannot be achieved with pure htmx.
