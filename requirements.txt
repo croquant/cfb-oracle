@@ -14,7 +14,7 @@ django-unfold==0.64.0
 djlint==1.36.4
 EditorConfig==0.17.1
 filelock==3.18.0
-identify==2.6.12
+identify==2.6.13
 jsbeautifier==1.15.4
 json5==0.12.0
 nodeenv==1.9.1
